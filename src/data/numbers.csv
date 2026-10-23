@@ -1,0 +1,156 @@
+word,plural,category,tier
+One,,cardinal,normal
+Two,,cardinal,common
+Three,,cardinal,common
+Four,,cardinal,common
+Five,,cardinal,common
+Six,,cardinal,common
+Seven,,cardinal,common
+Eight,,cardinal,common
+Nine,,cardinal,common
+Ten,,cardinal,common
+Eleven,,cardinal,normal
+Twelve,,cardinal,common
+Dozen,,cardinal,normal
+Thirteen,,cardinal,normal
+Fourteen,,cardinal,normal
+Fifteen,,cardinal,normal
+Sixteen,,cardinal,normal
+Seventeen,,cardinal,normal
+Eighteen,,cardinal,normal
+Nineteen,,cardinal,normal
+Score,,cardinal,normal
+Twenty,,cardinal,normal
+Twenty-One,,cardinal,rare
+Twenty-Two,,cardinal,rare
+Twenty-Four,,cardinal,rare
+Twenty-Five,,cardinal,rare
+Twenty-Seven,,cardinal,rare
+Thirty,,cardinal,normal
+Thirty-Three,,cardinal,rare
+Thirty-Six,,cardinal,rare
+Thirty-Nine,,cardinal,rare
+Forty,,cardinal,normal
+Forty-Two,,cardinal,rare
+Forty-Eight,,cardinal,rare
+Fifty,,cardinal,normal
+Fifty-Five,,cardinal,rare
+Sixty,,cardinal,normal
+Three Score,,cardinal,rare
+Sixty-Four,,cardinal,rare
+Sixty-Six,,cardinal,rare
+Sixty-Nine,,cardinal,rare
+Seventy,,cardinal,normal
+Seventy-Six,,cardinal,rare
+Eighty,,cardinal,normal
+Four Score,,cardinal,rare
+Four Score and Seven,,cardinal,rare
+Eighty-Eight,,cardinal,rare
+Ninety,,cardinal,normal
+Ninety-Nine,,cardinal,rare
+Hundred,,cardinal,common
+Hundred and One,,cardinal,normal
+Hundred and Eight,,cardinal,rare
+Hundred and Eleven,,cardinal,rare
+Gross,,cardinal,rare
+Hundred and Forty-Four,,cardinal,rare
+Three Hundred,,cardinal,rare
+Three Hundred and Sixty-Five,,cardinal,rare
+Four Hundred and Four,,cardinal,rare
+Four Hundred and Twenty,,cardinal,rare
+Four Hundred and Forty-Four,,cardinal,rare
+Four Hundred and Fifty-One,,cardinal,rare
+Five Hundred,,cardinal,normal
+Six Hundred and Sixty-Six,,cardinal,rare
+Seven Hundred and Seventy-Seven,,cardinal,rare
+Eight Hundred,,cardinal,rare
+Nine Hundred and Ninety-Nine,,cardinal,rare
+Thousand,,cardinal,common
+Thousand and One,,cardinal,normal
+Four Thousand,,cardinal,rare
+Nine Thousand,,cardinal,rare
+Nine Thousand and One,,cardinal,rare
+Myriad,,cardinal,normal
+Ten Thousand,,cardinal,normal
+Twenty Thousand,,cardinal,rare
+Hundred Thousand,,cardinal,normal
+Million,,cardinal,normal
+Umpteen,,cardinal,rare
+Zeroth,,ordinal,rare
+First,,ordinal,common
+Second,,ordinal,common
+Third,,ordinal,common
+Fourth,,ordinal,common
+Fifth,,ordinal,common
+Sixth,,ordinal,common
+Seventh,,ordinal,common
+Eighth,,ordinal,common
+Ninth,,ordinal,common
+Tenth,,ordinal,common
+Eleventh,,ordinal,normal
+Twelfth,,ordinal,common
+Thirteenth,,ordinal,normal
+Fourteenth,,ordinal,normal
+Fifteenth,,ordinal,normal
+Sixteenth,,ordinal,normal
+Seventeenth,,ordinal,normal
+Eighteenth,,ordinal,normal
+Nineteenth,,ordinal,normal
+Twentieth,,ordinal,normal
+Twenty-First,,ordinal,rare
+Twenty-Second,,ordinal,rare
+Twenty-Fourth,,ordinal,rare
+Twenty-Fifth,,ordinal,rare
+Twenty-Seventh,,ordinal,rare
+Thirtieth,,ordinal,normal
+Thirty-Third,,ordinal,rare
+Thirty-Sixth,,ordinal,rare
+Thirty-Ninth,,ordinal,rare
+Fortieth,,ordinal,normal
+Forty-Second,,ordinal,rare
+Forty-Eighth,,ordinal,rare
+Fiftieth,,ordinal,normal
+Fifty-Fifth,,ordinal,rare
+Sixtieth,,ordinal,normal
+Sixty-Fourth,,ordinal,rare
+Sixty-Sixth,,ordinal,rare
+Sixty-Ninth,,ordinal,rare
+Seventieth,,ordinal,normal
+Seventy-Sixth,,ordinal,rare
+Eightieth,,ordinal,normal
+Eighty-Eighth,,ordinal,rare
+Ninetieth,,ordinal,normal
+Ninety-Ninth,,ordinal,rare
+Hundredth,,ordinal,common
+Hundred-and-First,,ordinal,normal
+Hundred-and-Eighth,,ordinal,rare
+Hundred-and-Eleventh,,ordinal,rare
+Hundred-and-Forty-Fourth,,ordinal,rare
+Three-Hundredth,,ordinal,rare
+Three-Hundred-and-Sixty-Fifth,,ordinal,rare
+Four-Hundred-and-Fourth,,ordinal,rare
+Four-Hundred-and-Twentieth,,ordinal,rare
+Four-Hundred-and-Forty-Fourth,,ordinal,rare
+Four-Hundred-and-Fifty-First,,ordinal,rare
+Five-Hundredth,,ordinal,normal
+Six-Hundred-and-Sixty-Sixth,,ordinal,rare
+Seven-Hundred-and-Seventy-Seventh,,ordinal,rare
+Eight-Hundredth,,ordinal,rare
+Nine-Hundred-and-Ninety-Ninth,,ordinal,rare
+Thousandth,,ordinal,common
+Thousand-and-First,,ordinal,normal
+Four-Thousandth,,ordinal,rare
+Nine-Thousandth,,ordinal,rare
+Nine-Thousand-and-First,,ordinal,rare
+Ten-Thousandth,,ordinal,normal
+Twenty-Thousandth,,ordinal,rare
+Hundred-Thousandth,,ordinal,normal
+Millionth,,ordinal,normal
+Umpteenth,,ordinal,rare
+Foremost,,ordinal,rare
+Latter,,ordinal,rare
+Penultimate,,ordinal,rare
+Last,,ordinal,common
+Final,,ordinal,rare
+Ultimate,,ordinal,rare
+Hindmost,,ordinal,rare

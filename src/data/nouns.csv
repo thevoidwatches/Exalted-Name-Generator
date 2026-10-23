@@ -1,0 +1,644 @@
+word,plural,category,tier
+Aardvark,Aardvarks,animal,rare
+Albatross,Albatrosses,animal,normal
+Alligator,Alligators,animal,rare
+Ant,Ants,animal,normal
+Antelope,Antelopes,animal,normal
+Ape,Apes,animal,normal
+Ass,Asses,animal,rare
+Austrech,Austreches,animal,rare
+Badger,Badgers,animal,normal
+Basilisk,Basilisks,animal,rare
+Bass,Bass,animal,normal
+Bat,Bats,animal,normal
+Bear,Bears,animal,common
+Bearcat,Bearcats,animal,rare
+Beaver,Beavers,animal,normal
+Bee,Bees,animal,common
+Beetle,Beetles,animal,normal
+Behemoth,Behemoths,animal,rare
+Bison,Bison,animal,normal
+Boar,Boars,animal,common
+Buffalo,Buffalo,animal,normal
+Bull,Bulls,animal,common
+Butterfly,Butterflies,animal,normal
+Camel,Camels,animal,normal
+Carp,Carp,animal,common
+Cat,Cats,animal,common
+Centipede,Centipedes,animal,rare
+Chameleon,Chameleons,animal,normal
+Cicada,Cicadas,animal,normal
+Clam,Clams,animal,rare
+Claw Strider,Claw Striders,animal,rare
+Cobra,Cobras,animal,normal
+Colt,Colts,animal,normal
+Condor,Condors,animal,normal
+Cormorant,Cormorants,animal,rare
+Cougar,Cougars,animal,normal
+Cow,Cows,animal,normal
+Crab,Crabs,animal,normal
+Crane,Cranes,animal,common
+Cricket,Crickets,animal,normal
+Crocodile,Crocodiles,animal,rare
+Crow,Crows,animal,common
+Cuckoo,Cuckoos,animal,normal
+Deer,Deer,animal,common
+Doe,Does,animal,normal
+Dog,Dogs,animal,common
+Dolphin,Dolphins,animal,normal
+Donkey,Donkeys,animal,normal
+Dove,Doves,animal,common
+Dragonfly,Dragonflies,animal,normal
+Duck,Ducks,animal,common
+Eagle,Eagles,animal,common
+Eel,Eels,animal,normal
+Egret,Egrets,animal,normal
+Elephant,Elephants,animal,normal
+Elk,Elk,animal,normal
+Ermine,Ermines,animal,normal
+Falcon,Falcons,animal,common
+Ferret,Ferrets,animal,normal
+Finch,Finches,animal,normal
+Firefly,Fireflies,animal,normal
+Flamingo,Flamingos,animal,normal
+Flea,Fleas,animal,rare
+Flock,Flocks,animal,rare
+Foal,Foals,animal,normal
+Fox,Foxes,animal,common
+Frog,Frogs,animal,normal
+Gazelle,Gazelles,animal,normal
+Gecko,Geckos,animal,normal
+Giraffe,Giraffes,animal,rare
+Goat,Goats,animal,common
+Goose,Geese,animal,common
+Gopher,Gophers,animal,normal
+Grasshopper,Grasshoppers,animal,normal
+Griffin,Griffins,animal,rare
+Gull,Gulls,animal,normal
+Hare,Hares,animal,common
+Hart,Harts,animal,normal
+Hawk,Hawks,animal,common
+Hedgehog,Hedgehogs,animal,normal
+Hen,Hens,animal,common
+Heron,Herons,animal,common
+Herring,Herring,animal,normal
+Hippopotamus,Hippopotamuses,animal,rare
+Hornet,Hornets,animal,normal
+Horse,Horses,animal,common
+Hound,Hounds,animal,common
+Housefly,Houseflies,animal,rare
+Hummingbird,Hummingbirds,animal,normal
+Hybroc,Hybrocs,animal,rare
+Hyena,Hyenas,animal,normal
+Ibex,Ibexes,animal,normal
+Ibis,Ibises,animal,normal
+Jackal,Jackals,animal,normal
+Jackalope,Jackalopes,animal,rare
+Jaguar,Jaguars,animal,normal
+Jay,Jays,animal,normal
+Jellyfish,Jellyfish,animal,rare
+Kangaroo,Kangaroos,animal,rare
+Kestrel,Kestrels,animal,normal
+Kingfisher,Kingfishers,animal,normal
+Kirin,Kirin,animal,rare
+Kite,Kites,animal,normal
+Koala,Koalas,animal,rare
+Koi,Koi,animal,common
+Lamb,Lambs,animal,common
+Lark,Larks,animal,common
+Leech,Leeches,animal,rare
+Lemur,Lemurs,animal,normal
+Leopard,Leopards,animal,normal
+Leviathan,Leviathans,animal,rare
+Lion,Lions,animal,common
+Lizard,Lizards,animal,normal
+Llama,Llamas,animal,rare
+Lobster,Lobsters,animal,normal
+Locust,Locusts,animal,normal
+Lynx,Lynxes,animal,normal
+Magpie,Magpies,animal,normal
+Mammoth,Mammoths,animal,rare
+Manatee,Manatees,animal,rare
+Mantis,Mantises,animal,normal
+Mare,Mares,animal,normal
+Marten,Martens,animal,normal
+Mastodon,Mastodons,animal,rare
+Mayfly,Mayflies,animal,normal
+Millipede,Millipedes,animal,rare
+Mink,Minks,animal,normal
+Minnow,Minnows,animal,normal
+Mockingbird,Mockingbirds,animal,normal
+Mole,Moles,animal,normal
+Mongoose,Mongooses,animal,normal
+Monkey,Monkeys,animal,normal
+Moose,Moose,animal,normal
+Moth,Moths,animal,normal
+Mouse,Mice,animal,common
+Mule,Mules,animal,normal
+Narwhal,Narwhals,animal,rare
+Newt,Newts,animal,normal
+Nightingale,Nightingales,animal,normal
+Nightjar,Nightjars,animal,normal
+Octopus,Octopuses,animal,normal
+Orca,Orcas,animal,normal
+Osprey,Ospreys,animal,normal
+Otter,Otters,animal,common
+Owl,Owls,animal,common
+Ox,Oxen,animal,common
+Oyster,Oysters,animal,rare
+Panda,Pandas,animal,normal
+Panther,Panthers,animal,normal
+Peacock,Peacocks,animal,normal
+Pelican,Pelicans,animal,normal
+Penguin,Penguins,animal,rare
+Pheasant,Pheasants,animal,normal
+Phoenix,Phoenixes,animal,rare
+Pig,Pigs,animal,common
+Pigeon,Pigeons,animal,normal
+Pike,Pike,animal,normal
+Piranha,Piranhas,animal,rare
+Porcupine,Porcupines,animal,normal
+Possum,Possums,animal,rare
+Prairie Dog,Prairie Dogs,animal,rare
+Puma,Pumas,animal,normal
+Python,Pythons,animal,normal
+Quail,Quails,animal,normal
+Rabbit,Rabbits,animal,common
+Raccoon,Raccoons,animal,rare
+Raiton,Raitons,animal,normal
+Ram,Rams,animal,normal
+Rat,Rats,animal,normal
+Raven,Ravens,animal,common
+Ray,Rays,animal,normal
+Reindeer,Reindeer,animal,normal
+Rhinoceros,Rhinoceroses,animal,rare
+River Dragon,River Dragons,animal,rare
+Rook,Rooks,animal,normal
+Rooster,Roosters,animal,common
+Sable,Sables,animal,normal
+Salamander,Salamanders,animal,normal
+Salmon,Salmon,animal,normal
+Sardine,Sardines,animal,rare
+Scarab,Scarabs,animal,normal
+Scorpion,Scorpions,animal,normal
+Seahorse,Seahorses,animal,normal
+Seal,Seals,animal,normal
+Serpent,Serpents,animal,common
+Shark,Sharks,animal,normal
+Sheep,Sheep,animal,normal
+Shrike,Shrikes,animal,normal
+Shrimp,Shrimp,animal,normal
+Siaka,Siakas,animal,rare
+Silkworm,Silkworms,animal,normal
+Simhata,Simhatas,animal,rare
+Sloth,Sloths,animal,normal
+Smelt,Smelt,animal,rare
+Snail,Snails,animal,normal
+Snake,Snakes,animal,normal
+Snipe,Snipes,animal,normal
+Sole,Sole,animal,normal
+Sparrow,Sparrows,animal,common
+Spider,Spiders,animal,normal
+Squid,Squid,animal,normal
+Squirrel,Squirrels,animal,normal
+Stag,Stags,animal,common
+Stallion,Stallions,animal,normal
+Starfish,Starfish,animal,rare
+Starling,Starlings,animal,normal
+Stoat,Stoats,animal,normal
+Stork,Storks,animal,normal
+Strix,Strixes,animal,normal
+Swallow,Swallows,animal,common
+Swan,Swans,animal,common
+Thrush,Thrushes,animal,normal
+Tick,Ticks,animal,rare
+Tiger,Tigers,animal,common
+Tigress,Tigresses,animal,rare
+Toad,Toads,animal,normal
+Tortoise,Tortoises,animal,normal
+Trout,Trout,animal,normal
+Tuna,Tuna,animal,normal
+Turtle,Turtles,animal,normal
+Tyrant Lizard,Tyrant Lizards,animal,rare
+Unicorn,Unicorns,animal,rare
+Viper,Vipers,animal,normal
+Vulture,Vultures,animal,normal
+Wallaby,Wallabies,animal,rare
+Walrus,Walruses,animal,rare
+Wasp,Wasps,animal,normal
+Weasel,Weasels,animal,normal
+Whale,Whales,animal,normal
+Wolf,Wolves,animal,common
+Wolverine,Wolverines,animal,normal
+Woodpecker,Woodpeckers,animal,normal
+Worm,Worms,animal,normal
+Wren,Wrens,animal,common
+Wyvern,Wyverns,animal,rare
+Yak,Yaks,animal,normal
+Yeddim,Yeddim,animal,rare
+Zebra,Zebras,animal,rare
+Ankle,Ankles,body part,rare
+Antler,Antlers,body part,normal
+Arms,Arms,body part,rare
+Back,Backs,body part,rare
+Beak,Beaks,body part,normal
+Belly,Bellies,body part,common
+Blood,,body part,rare
+Bone,Bones,body part,rare
+Breath,Breaths,body part,common
+Brow,Brows,body part,normal
+Carapace,Carapaces,body part,rare
+Cheek,Cheeks,body part,rare
+Chest,Chests,body part,normal
+Chin,Chins,body part,rare
+Claw,Claws,body part,common
+Ear,Ears,body part,normal
+Elbow,Elbows,body part,rare
+Eye,Eyes,body part,common
+Face,Faces,body part,common
+Fang,Fangs,body part,common
+Feather,Feathers,body part,common
+Fin,Fins,body part,normal
+Finger,Fingers,body part,normal
+Fist,Fists,body part,common
+Foot,Feet,body part,common
+Gut,Guts,body part,rare
+Hair,Hairs,body part,rare
+Hand,Hands,body part,common
+Haunch,Haunches,body part,rare
+Heart,Hearts,body part,common
+Heel,Heels,body part,rare
+Hide,Hides,body part,normal
+Hip,Hips,body part,rare
+Hoof,Hooves,body part,common
+Horn,Horns,body part,common
+Jaw,Jaws,body part,normal
+Knee,Knees,body part,rare
+Knuckle,Knuckles,body part,rare
+Leg,Legs,body part,rare
+Limb,Limbs,body part,normal
+Lips,Lips,body part,normal
+Mane,Manes,body part,common
+Marrow,,body part,rare
+Maw,Maws,body part,normal
+Mouth,Mouths,body part,normal
+Muzzle,Muzzles,body part,rare
+Nose,Noses,body part,rare
+Palm,Palms,body part,common
+Paw,Paws,body part,common
+Pelt,Pelts,body part,normal
+Rib,Ribs,body part,rare
+Scale,Scales,body part,normal
+Shadow,Shadows,body part,normal
+Shell,Shells,body part,normal
+Shoulder,Shoulders,body part,normal
+Skin,Skins,body part,rare
+Skull,Skulls,body part,normal
+Snout,Snouts,body part,rare
+Spine,Spines,body part,normal
+Spur,Spurs,body part,normal
+Sting,Stings,body part,normal
+Tail,Tails,body part,common
+Talon,Talons,body part,normal
+Tear,Tears,body part,normal
+Throat,Throats,body part,normal
+Thumb,Thumbs,body part,rare
+Toe,Toes,body part,rare
+Tongue,Tongues,body part,common
+Tooth,Teeth,body part,common
+Trunk,Trunks,body part,rare
+Tusk,Tusks,body part,normal
+Vein,Veins,body part,normal
+Visage,Visages,body part,rare
+Voice,Voices,body part,common
+Whisker,Whiskers,body part,normal
+Wing,Wings,body part,common
+Wrist,Wrists,body part,rare
+Blessing,Blessings,concept,common
+Chant,Chants,concept,normal
+Charm,Charms,concept,normal
+Curse,Curses,concept,normal
+Dirge,Dirges,concept,normal
+Doctrine,Doctrines,concept,rare
+Dominion,Dominions,concept,rare
+Enchantment,Enchantments,concept,rare
+Epiphany,Epiphanies,concept,rare
+Hex,Hexes,concept,rare
+Hymn,Hymns,concept,common
+Incantation,Incantations,concept,rare
+Invocation,Invocations,concept,rare
+Judgement,Judgements,concept,rare
+Lament,Laments,concept,normal
+Litany,Litanies,concept,rare
+Mandate,Mandates,concept,rare
+Mantra,Mantras,concept,normal
+Mien,,concept,rare
+Name,Names,concept,common
+Oath,Oaths,concept,common
+Oration,Orations,concept,rare
+Path,Paths,concept,common
+Prayer,Prayers,concept,common
+Reign,Reigns,concept,rare
+Revelation,Revelations,concept,rare
+Secret,Secrets,concept,common
+Serenade,Serenades,concept,normal
+Shout,Shouts,concept,rare
+Song,Songs,concept,common
+Symphony,Symphonies,concept,rare
+Utterance,Utterances,concept,rare
+Verdict,Verdicts,concept,rare
+Vision,Visions,concept,common
+Way,Ways,concept,common
+Whisper,Whispers,concept,common
+Whistle,Whistles,concept,rare
+Ambush,Ambushes,epithet,rare
+Awareness,,epithet,rare
+Bargain,Bargains,epithet,common
+Ceremony,Ceremonies,epithet,normal
+Certainty,,epithet,rare
+Convocation,Convocations,epithet,rare
+Dance,Dances,epithet,common
+Discipline,,epithet,rare
+Elegance,,epithet,rare
+Embrace,Embraces,epithet,common
+Feat,Feats,epithet,common
+Flourish,Flourishes,epithet,normal
+Game,Games,epithet,common
+Gaze,Gazes,epithet,common
+Homage,,epithet,rare
+Insight,Insights,epithet,normal
+Instinct,Instincts,epithet,rare
+Intent,Intents,epithet,rare
+Intuition,,epithet,rare
+Jealousy,,epithet,normal
+Kiss,Kisses,epithet,common
+Mastery,,epithet,rare
+Onslaught,Onslaughts,epithet,rare
+Poise,,epithet,rare
+Presence,,epithet,rare
+Purpose,Purposes,epithet,common
+Pursuit,Pursuits,epithet,normal
+Redemption,,epithet,rare
+Resplendence,,epithet,rare
+Righteousness,,epithet,rare
+Stratagem,Stratagems,epithet,rare
+Terror,Terrors,epithet,normal
+Theft,Thefts,epithet,rare
+Trick,Tricks,epithet,normal
+Undoing,Undoings,epithet,rare
+Vice,Vices,epithet,rare
+Virtue,Virtues,epithet,rare
+Volley,Volleys,epithet,rare
+Wisdom,,epithet,common
+Wonder,Wonders,epithet,common
+Wrath,,epithet,common
+Aura,Auras,nature,rare
+Autumn,Autumns,nature,common
+Blast,Blasts,nature,rare
+Breeze,Breezes,nature,normal
+Brook,Brooks,nature,common
+Burst,Bursts,nature,rare
+Cloud,Clouds,nature,common
+Comet,Comets,nature,normal
+Cyclone,Cyclones,nature,rare
+Dawn,Dawns,nature,common
+Dune,Dunes,nature,normal
+Dusk,Dusks,nature,common
+Echo,Echoes,nature,rare
+Eclipse,Eclipses,nature,normal
+Ember,Embers,nature,common
+Evening,Evenings,nature,rare
+Flame,Flames,nature,common
+Flash,Flashes,nature,rare
+Flood,Floods,nature,normal
+Fog,Fogs,nature,normal
+Frost,Frosts,nature,common
+Gale,Gales,nature,normal
+Glacier,Glaciers,nature,rare
+Gust,Gusts,nature,normal
+Halo,Halos,nature,rare
+Heaven,Heavens,nature,rare
+Hurricane,Hurricanes,nature,rare
+Ice,,nature,normal
+Lightning,,nature,normal
+Maelstrom,Maelstroms,nature,rare
+Meadow,Meadows,nature,common
+Midnight,Midnights,nature,normal
+Mist,Mists,nature,common
+Monsoon,Monsoons,nature,rare
+Moon,Moons,nature,common
+Morn,Morns,nature,normal
+Morning,Mornings,nature,rare
+Mountain,Mountains,nature,common
+Night,Nights,nature,common
+Oasis,Oases,nature,rare
+Rain,Rains,nature,common
+Rainbow,Rainbows,nature,normal
+River,Rivers,nature,common
+Sea,Seas,nature,common
+Shower,Showers,nature,normal
+Sky,Skies,nature,common
+Snow,Snows,nature,common
+Spiral,Spirals,nature,rare
+Spring,Springs,nature,common
+Star,Stars,nature,common
+Storm,Storms,nature,common
+Summer,Summers,nature,common
+Sun,Suns,nature,common
+Thunder,Thunders,nature,common
+Tide,Tides,nature,common
+Tornado,Tornadoes,nature,rare
+Torrent,Torrents,nature,rare
+Twilight,Twilights,nature,normal
+Typhoon,Typhoons,nature,rare
+Valley,Valleys,nature,normal
+Wave,Waves,nature,common
+Wellspring,Wellsprings,nature,rare
+Wind,Winds,nature,common
+Winter,Winters,nature,common
+Arrow,Arrows,object,common
+Banner,Banners,object,common
+Bell,Bells,object,common
+Blade,Blades,object,common
+Book,Books,object,normal
+Bow,Bows,object,common
+Bugle,Bugles,object,normal
+Candle,Candles,object,common
+Chariot,Chariots,object,rare
+Chime,Chimes,object,common
+Cloak,Cloaks,object,common
+Coin,Coins,object,common
+Conch,Conches,object,rare
+Crown,Crowns,object,normal
+Cup,Cups,object,common
+Cymbal,Cymbals,object,normal
+Diagram,Diagrams,object,rare
+Drum,Drums,object,common
+Dulcimer,Dulcimers,object,rare
+Fan,Fans,object,normal
+Fiddle,Fiddles,object,common
+Flute,Flutes,object,normal
+Gate,Gates,object,normal
+Glyph,Glyphs,object,rare
+Gong,Gongs,object,normal
+Hammer,Hammers,object,common
+Harp,Harps,object,common
+Horn,Horns,object,common
+Key,Keys,object,common
+Lamp,Lamps,object,common
+Lance,Lances,object,rare
+Lantern,Lanterns,object,common
+Lute,Lutes,object,common
+Lyre,Lyres,object,rare
+Mace,Maces,object,rare
+Mask,Masks,object,common
+Mirror,Mirrors,object,common
+Needle,Needles,object,common
+Noose,Nooses,object,rare
+Ocarina,Ocarinas,object,rare
+Pipa,Pipas,object,rare
+Pipe,Pipes,object,common
+Pyre,Pyres,object,rare
+Rattle,Rattles,object,common
+Reed,Reeds,object,common
+Rune,Runes,object,rare
+Scroll,Scrolls,object,normal
+Seal,Seals,object,rare
+Shape,Shapes,object,rare
+Shield,Shields,object,common
+Sigil,Sigils,object,rare
+Spear,Spears,object,common
+Staff,Staves,object,common
+Symbol,Symbols,object,rare
+Taiko,Taiko,object,rare
+Tambourine,Tambourines,object,normal
+Thread,Threads,object,common
+Tower,Towers,object,rare
+Trombone,Trombones,object,rare
+Trumpet,Trumpets,object,normal
+Veil,Veils,object,common
+Vessel,Vessels,object,rare
+Web,Webs,object,rare
+Yoke,Yokes,object,rare
+Zither,Zithers,object,rare
+Archer,Archers,person,common
+Bargainer,Bargainers,person,rare
+Bride,Brides,person,common
+Brother,Brothers,person,common
+Champion,Champions,person,rare
+Chanter,Chanters,person,rare
+Child,Children,person,common
+Dancer,Dancers,person,common
+Daughter,Daughters,person,common
+Disciple,Disciples,person,rare
+Dreamer,Dreamers,person,common
+Father,Fathers,person,common
+Guardian,Guardians,person,rare
+Hunter,Hunters,person,common
+Judge,Judges,person,rare
+King,Kings,person,rare
+Knight,Knights,person,rare
+Laborer,Laborers,person,common
+Lady,Ladies,person,rare
+Lord,Lords,person,rare
+Maiden,Maidens,person,common
+Marshal,Marshals,person,rare
+Master,Masters,person,rare
+Monk,Monks,person,common
+Mother,Mothers,person,common
+Nobleman,Noblemen,person,rare
+Noblewoman,Noblewomen,person,rare
+Orator,Orators,person,rare
+Pilgrim,Pilgrims,person,common
+Priest,Priests,person,common
+Priestess,Priestesses,person,common
+Prince,Princes,person,rare
+Princess,Princesses,person,rare
+Protector,Protectors,person,rare
+Pursuer,Pursuers,person,rare
+Queen,Queens,person,rare
+Redeemer,Redeemers,person,rare
+Rider,Riders,person,common
+Runner,Runners,person,common
+Sailor,Sailors,person,common
+Scholar,Scholars,person,rare
+Sentinel,Sentinels,person,rare
+Singer,Singers,person,common
+Sister,Sisters,person,common
+Sleeper,Sleepers,person,rare
+Smith,Smiths,person,common
+Son,Sons,person,common
+Spirit,Spirits,person,rare
+Stranger,Strangers,person,common
+Striker,Strikers,person,rare
+Teacher,Teachers,person,rare
+Thief,Thieves,person,common
+Thinker,Thinkers,person,rare
+Usurper,Usurpers,person,rare
+Visionary,Visionaries,person,rare
+Wanderer,Wanderers,person,common
+Warden,Wardens,person,rare
+Watcher,Watchers,person,common
+Weaver,Weavers,person,common
+Whisperer,Whisperers,person,rare
+Widow,Widows,person,common
+Youth,Youths,person,common
+Apple,Apples,plant,common
+Ash,Ashes,plant,common
+Aspen,Aspens,plant,common
+Aster,Asters,plant,normal
+Bamboo,,plant,normal
+Baobab,Baobabs,plant,rare
+Basil,,plant,normal
+Berry,Berries,plant,common
+Blossom,Blossoms,plant,common
+Boxwood,Boxwoods,plant,rare
+Cedar,Cedars,plant,common
+Champignon,Champignons,plant,rare
+Cherry,Cherries,plant,common
+Cottonwood,Cottonwoods,plant,rare
+Crimini,Criminis,plant,rare
+Ebony,,plant,normal
+Enoki,Enokis,plant,rare
+Evergreen,Evergreens,plant,rare
+Fir,Firs,plant,common
+Flower,Flowers,plant,common
+Gingko,Gingkos,plant,rare
+Hops,Hops,plant,rare
+Ivy,Ivies,plant,common
+Juniper,Junipers,plant,common
+Laurel,Laurels,plant,common
+Leaf,Leaves,plant,common
+Lemon,Lemons,plant,common
+Lime,Limes,plant,normal
+Linden,Lindens,plant,normal
+Lotus,Lotuses,plant,common
+Maple,Maples,plant,common
+Mushroom,Mushrooms,plant,normal
+Oak,Oaks,plant,common
+Orange,Oranges,plant,normal
+Orchid,Orchids,plant,common
+Parsley,,plant,rare
+Pear,Pears,plant,common
+Pine,Pines,plant,common
+Plum,Plums,plant,common
+Poplar,Poplars,plant,normal
+Poppy,Poppies,plant,common
+Redwood,Redwoods,plant,normal
+Rose,Roses,plant,common
+Rosemary,,plant,normal
+Rowan,Rowans,plant,common
+Rue,,plant,common
+Sage,,plant,common
+Salvia,,plant,rare
+Sequoia,Sequoias,plant,rare
+Sorrel,Sorrels,plant,normal
+Soy,,plant,rare
+Spruce,Spruces,plant,normal
+Sycamore,Sycamores,plant,normal
+Tarragon,,plant,rare
+Teak,,plant,rare
+Thistle,Thistles,plant,common
+Thorn,Thorns,plant,common
+Thyme,,plant,normal
+Willow,Willows,plant,common

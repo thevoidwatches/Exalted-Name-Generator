@@ -1,7 +1,7 @@
-name: Build and deploy to GitHub Pages
+name: Test, build and deploy to GitHub Pages
 
-# Rebuilds index.html from template.html and src/*.txt on every push to main,
-# then publishes it. Edit a word list on GitHub and the site updates itself.
+# On every push to main: install, run the tests, build the site, publish it.
+# A failing test (for example a typo in a word CSV) stops the deploy, so the live site keeps its last good version.
 
 on:
   push:
@@ -22,18 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
-      - name: Build index.html
-        run: python build.py
-      - name: Collect the site
-        run: |
-          mkdir -p site
-          cp index.html site/
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: dist
 
   deploy:
     needs: build

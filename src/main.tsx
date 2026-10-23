@@ -1,0 +1,16 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from '@/components';
+import { injectTheme } from '@/functions';
+import '@/styles/global.css';
+
+injectTheme();
+
+const root = document.getElementById('root');
+if (!root) throw new Error('The page is missing its #root element.');
+
+createRoot(root).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
