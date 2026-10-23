@@ -1,0 +1,12 @@
+# Draft lists are scratch work; keep the folder, not its contents
+.notes/*
+!.notes/.gitkeep
+
+# Editor and OS noise
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+desktop.ini
+__pycache__/
+*.pyc

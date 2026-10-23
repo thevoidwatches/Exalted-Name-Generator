@@ -1,0 +1,44 @@
+# Common = short, warm words. Rare = formal or ecclesiastical ones.
+
+# common
+Blessing
+Hymn
+Name
+Oath
+Path
+Prayer
+Secret
+Song
+Vision
+Way
+Whisper
+
+# normal
+Chant
+Charm
+Curse
+Dirge
+Lament
+Mantra
+Serenade
+
+# rare
+Doctrine
+Dominion
+Enchantment
+Epiphany
+Hex
+Incantation
+Invocation
+Judgement
+Litany
+Mandate
+Mien
+Oration
+Reign
+Revelation
+Shout
+Symphony
+Utterance
+Verdict
+Whistle

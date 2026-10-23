@@ -1,0 +1,829 @@
+<title>Exalted-Style Name Generator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya:ital,wght@0,400;0,500;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+  /* Layout: one reading column of results on the left, a sticky favorites ledger on the right; stacks at phone width.
+     Palette: celadon paper and ink with orichalcum gold as the single accent, jade green for "kept" state. */
+  :root {
+    --bg: #eef1ea;
+    --panel: #f7f8f3;
+    --fg: #1f2a24;
+    --muted: #5e6a62;
+    --line: #cfd6cb;
+    --gold: #a67c1e;
+    --gold-soft: #e9dbb3;
+    --jade: #3f7d5c;
+    --jade-soft: #d6e6dc;
+    --tier-c: #a67c1e; --tier-n: #cfae63; --tier-r: #e8dcb8;
+    --display: 'Marcellus', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    --body: 'Alegreya', Georgia, 'Times New Roman', serif;
+    --ui: 'Alegreya Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141a17; --panel: #1c2420; --fg: #e8e4d6; --muted: #9ea89f; --line: #33403a;
+      --gold: #d4a640; --gold-soft: #3d3418; --jade: #6fb08a; --jade-soft: #22352b; --tier-c: #d4a640; --tier-n: #8f7030; --tier-r: #4a3c1b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141a17; --panel: #1c2420; --fg: #e8e4d6; --muted: #9ea89f; --line: #33403a;
+    --gold: #d4a640; --gold-soft: #3d3418; --jade: #6fb08a; --jade-soft: #22352b; --tier-c: #d4a640; --tier-n: #8f7030; --tier-r: #4a3c1b;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: var(--body); font-size: 17px; line-height: 1.5;
+    padding-block: 28px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+
+  header { display: flex; flex-direction: column; gap: 6px; margin-bottom: 26px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(1.7rem, 4vw, 2.5rem); letter-spacing: .02em; margin: 0; text-wrap: balance; }
+  .tag { color: var(--muted); margin: 0; max-width: 60ch; font-style: italic; }
+  .rule { display: flex; align-items: center; gap: 10px; color: var(--gold); margin-top: 8px; }
+  .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+  .rule::after { background: linear-gradient(270deg, var(--gold), transparent); }
+  .rule span { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 32px; align-items: start; }
+  @media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } .ledger { position: static !important; } }
+
+  /* Controls */
+  .controls { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+  .group { display: flex; flex-direction: column; gap: 6px; }
+  .label { font-family: var(--ui); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: baseline; gap: 10px; }
+  .label button { font-family: var(--ui); font-size: .7rem; letter-spacing: .05em; text-transform: none; font-weight: 500; background: none; border: 0; color: var(--gold); cursor: pointer; padding: 0; }
+  .label button:hover, .label button:focus-visible { text-decoration: underline; }
+  .label .key { font-weight: 400; letter-spacing: .03em; text-transform: none; font-style: italic; margin-left: auto; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: var(--ui); font-size: .9rem; font-weight: 500; line-height: 1;
+    padding: 7px 11px; border-radius: 999px; cursor: pointer;
+    background: var(--panel); color: var(--muted); border: 1px solid var(--line);
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .chip:hover { border-color: var(--gold); }
+  .chip:disabled { opacity: .45; cursor: not-allowed; border-style: dashed; text-decoration: line-through; }
+  .chip:disabled:hover { border-color: var(--line); }
+  .chip[aria-pressed="true"] { background: var(--gold-soft); color: var(--fg); border-color: var(--gold); }
+  .chip:focus-visible, .btn:focus-visible, select:focus-visible, .star:focus-visible, .rm:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .chip small { color: var(--muted); font-weight: 400; margin-left: 4px; font-style: italic; }
+  .chip[aria-pressed="true"] small { color: var(--muted); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
+  .btn {
+    font-family: var(--ui); font-size: 1rem; font-weight: 700; letter-spacing: .04em;
+    padding: 10px 20px; border-radius: 6px; cursor: pointer; border: 1px solid var(--gold);
+    background: var(--gold); color: #fff8e6;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; color: var(--gold); font-weight: 500; }
+  .btn.quiet:hover { background: var(--gold-soft); }
+  select { font-family: var(--ui); font-size: .95rem; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); }
+  .hint { font-family: var(--ui); font-size: .85rem; color: var(--muted); }
+
+  /* Results */
+  .results { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .results li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--line); min-width: 0; }
+  .results li:first-child { border-top: 1px solid var(--line); }
+  .name { font-family: var(--display); font-size: clamp(1.25rem, 2.6vw, 1.6rem); line-height: 1.2; cursor: pointer; text-align: left; background: none; border: 0; padding: 0; color: var(--fg); overflow-wrap: anywhere; }
+  .name:hover { color: var(--gold); }
+  .name:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+  .form { font-family: var(--ui); font-size: .76rem; letter-spacing: .06em; color: var(--muted); margin-top: 2px; }
+  .star { font-size: 1.25rem; line-height: 1; background: none; border: 1px solid transparent; border-radius: 6px; padding: 6px 8px; cursor: pointer; color: var(--muted); }
+  .star:hover { color: var(--gold); border-color: var(--line); }
+  .star.on { color: var(--jade); }
+  .empty { color: var(--muted); font-style: italic; padding: 14px 4px; }
+
+  /* Favorites ledger */
+  .ledger { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--jade); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .ledger h2 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0; letter-spacing: .03em; display: flex; justify-content: space-between; align-items: baseline; }
+  .ledger h2 small { font-family: var(--ui); font-size: .78rem; color: var(--muted); letter-spacing: .05em; }
+  .favs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 50vh; overflow-y: auto; }
+  .favs li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px dotted var(--line); font-family: var(--display); font-size: 1.02rem; min-width: 0; }
+  .favs li span { overflow-wrap: anywhere; }
+  .rm { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 4px; flex: none; }
+  .rm:hover { color: var(--fg); background: var(--jade-soft); }
+  .ledger .actions { margin: 0; }
+  .ledger .btn { font-size: .9rem; padding: 8px 14px; }
+  .toast { font-family: var(--ui); font-size: .85rem; color: var(--jade); min-height: 1.2em; }
+
+  /* Weights panel */
+  .modal { border: 1px solid var(--line); border-top: 3px solid var(--gold); background: var(--panel); color: var(--fg); padding: 0; width: min(880px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+  .modal::backdrop { background: rgba(10, 16, 13, .5); }
+  .modal-inner { padding: 20px 22px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .modal h2 { font-family: var(--display); font-weight: 400; font-size: 1.3rem; margin: 0; letter-spacing: .03em; }
+  .modal .hint { max-width: 60ch; }
+  .wgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px 32px; }
+  .wsec h3 { font-family: var(--ui); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .wsec.wide { grid-column: 1 / -1; }
+  .wstack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .wsec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 4px; }
+  .wsec-head h3 { margin: 0; }
+  .wsec-tools { display: inline-flex; align-items: center; gap: 12px; margin-left: auto; }
+  .wreset { font-family: var(--ui); font-size: .72rem; letter-spacing: .05em; background: none; border: 0; color: var(--gold); cursor: pointer; padding: 0; }
+  .wreset:hover, .wreset:focus-visible { text-decoration: underline; }
+  .wsec .hint { margin: 2px 0 6px; font-size: .8rem; max-width: none; }
+  .wrow { display: grid; grid-template-columns: minmax(0, 1fr) 104px 58px 34px; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px dotted var(--line); font-size: .95rem; }
+  .wrow label { min-width: 0; }
+  .wrow small { color: var(--muted); font-family: var(--ui); font-size: .78rem; margin-left: 5px; }
+  .pct { font-family: var(--ui); font-size: .78rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .wrow input[type="number"] { width: 100%; font-family: var(--ui); font-size: .9rem; padding: 3px 5px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); text-align: right; font-variant-numeric: tabular-nums; }
+  .wrow input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  /* The bar is a range input: the track is painted as the bar, the thumb is a slim handle at the data end. */
+  .wbar { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; margin: 0; border-radius: 5px; cursor: ew-resize;
+          background: linear-gradient(to right, var(--gold) var(--p, 0%), var(--line) var(--p, 0%)); }
+  .wbar::-webkit-slider-thumb { -webkit-appearance: none; width: 6px; height: 16px; border-radius: 3px; background: var(--fg); border: 0; }
+  .wbar::-moz-range-thumb { width: 6px; height: 16px; border-radius: 3px; background: var(--fg); border: 0; }
+  .wbar::-moz-range-track { background: transparent; }
+  .wbar:disabled { opacity: .45; cursor: default; }
+  .wbar:disabled::-webkit-slider-thumb { background: var(--muted); }
+  .wbar:disabled::-moz-range-thumb { background: var(--muted); }
+  /* Tier split: one stacked bar per list, three ordered tones of the accent. */
+  .splits { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 28px; }
+  .legend { grid-column: 1 / -1; display: flex; gap: 14px; font-family: var(--ui); font-size: .78rem; color: var(--muted); margin-bottom: 4px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) 110px 76px; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 1px dotted var(--line); font-size: .9rem; }
+  .stack { display: flex; gap: 2px; height: 10px; }
+  .stack i { display: block; height: 100%; border-radius: 2px; min-width: 2px; }
+  .stack i:first-child { border-radius: 5px 2px 2px 5px; }
+  .stack i:last-child { border-radius: 2px 5px 5px 2px; }
+  .common { background: var(--tier-c); } .normal { background: var(--tier-n); } .rare { background: var(--tier-r); }
+  .modal .actions { justify-content: flex-end; margin-top: 4px; }
+  textarea.sel { position: absolute; left: -9999px; top: 0; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Exalted-Style Name Generator</h1>
+    <p class="tag">Names in the manner of Creation: Harmonious Jade, Seventh Crane, Lotus of Weeping Iron. Click a name to keep it.</p>
+    <div class="rule"><span></span></div>
+  </header>
+
+  <div class="grid">
+    <section>
+      <div class="controls">
+        <div class="group">
+          <div class="label">Patterns <button type="button" id="pat-all" title="Turn every pattern on">all</button><button type="button" id="pat-none" title="Turn every pattern off">none</button><span class="key">[brackets] mark optional parts</span></div>
+          <div class="chips" id="patterns"></div>
+        </div>
+        <div class="group">
+          <div class="label">Modifier sources</div>
+          <div class="chips" id="mods"></div>
+        </div>
+        <div class="group">
+          <div class="label">Number sources</div>
+          <div class="chips" id="nums"></div>
+        </div>
+        <div class="group">
+          <div class="label">Noun sources</div>
+          <div class="chips" id="nouns"></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn" id="gen">Generate</button>
+          <select id="count" aria-label="How many names">
+            <option value="5">5 names</option>
+            <option value="10" selected>10 names</option>
+            <option value="20">20 names</option>
+            <option value="50">50 names</option>
+          </select>
+          <button type="button" class="btn quiet" id="w-open" title="View and adjust every weight">Weights</button>
+          <span class="hint" id="hint"></span>
+        </div>
+      </div>
+      <ul class="results" id="results"></ul>
+    </section>
+
+    <aside class="ledger">
+      <h2>Kept names <small id="favcount"></small></h2>
+      <ul class="favs" id="favs"></ul>
+      <div class="actions">
+        <button type="button" class="btn" id="copy">Copy all</button>
+        <button type="button" class="btn quiet" id="clear">Clear</button>
+      </div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </aside>
+  </div>
+</div>
+<dialog id="weights" class="modal" aria-labelledby="w-title">
+  <form method="dialog" class="modal-inner">
+    <h2 id="w-title">Weights</h2>
+    <p class="hint">Higher numbers draw more often; zero never draws. Only the ratio between numbers matters. Changes apply to the next batch and are remembered in this browser.</p>
+    <div class="wgrid" id="wgrid"></div>
+    <div class="actions">
+      <button type="button" class="btn quiet" id="w-reset">Reset to defaults</button>
+      <button type="submit" class="btn">Done</button>
+    </div>
+  </form>
+</dialog>
+<textarea class="sel" id="seltext" aria-hidden="true" tabindex="-1"></textarea>
+
+<script>
+(function () {
+  const DATA = {"lists": {"adjectives": ["Bright", "Cold", "Diligent", "Excellent", "Fair", "Graceful", "Hopeful", "Humble", "Joyous", "Noble", "Silken", "Swift", "Virtuous", "Wandering", "Wary", "Weeping", "Wise", "Young", "Ascending", "Ashen", "Benevolent", "Blessed", "Bloodied", "Bound", "Brazen", "Brilliant", "Burnished", "Certain", "Clawed", "Cultivated", "Cursed", "Dreaming", "Elegant", "Eloquent", "Enchanted", "Evasive", "Fanged", "Feathered", "Flickering", "Fortuitous", "Frozen", "Fruitful", "Genial", "Gilded", "Glittering", "Gracious", "Harmonious", "Horned", "Insightful", "Intrepid", "Jealous", "Jubilant", "Luminous", "Lustrous", "Masked", "Meticulous", "Moonlit", "Mysterious", "Nascent", "Notable", "Poised", "Precise", "Radiant", "Resonant", "Reverent", "Secret", "Shadowed", "Sinister", "Soaring", "Splendid", "Stalwart", "Starlit", "Strident", "Sunlit", "Thorned", "Unfettered", "Unyielding", "Veiled", "Vigorous", "Wistful", "Youthful", "Adamant", "August", "Auspicious", "Coruscant", "Crowned", "Distinguished", "Eminent", "Enlightened", "Eternal", "Excessive", "Flawless", "Glorious", "Hallowed", "Horizon", "Incandescent", "Incendiary", "Incomparable", "Inconspicuous", "Inscrutable", "Kingly", "Lacquered", "Leaden", "Lordly", "Mercurial", "Powerful", "Priestly", "Princely", "Queenly", "Resplendent", "Righteous", "Sagacious", "Seismic", "Tempestuous", "Terrible", "Thunderous", "Triumphant", "Venerated", "Victorious", "Winged", "Wondrous", "Wrathful"], "animals": ["Bear", "Bee", "Boar", "Bull", "Carp", "Cat", "Crane", "Crow", "Deer", "Dog", "Dove", "Duck", "Eagle", "Falcon", "Fox", "Goat", "Goose", "Hare", "Hawk", "Hen", "Heron", "Horse", "Hound", "Koi", "Lamb", "Lark", "Lion", "Mouse", "Otter", "Owl", "Ox", "Pig", "Rabbit", "Raven", "Rooster", "Serpent", "Sparrow", "Stag", "Swallow", "Swan", "Tiger", "Wolf", "Wren", "Albatross", "Ant", "Antelope", "Ape", "Badger", "Bass", "Bat", "Beaver", "Beetle", "Bison", "Buffalo", "Butterfly", "Camel", "Chameleon", "Cicada", "Cobra", "Colt", "Condor", "Cougar", "Cow", "Crab", "Cricket", "Cuckoo", "Doe", "Dolphin", "Donkey", "Dragonfly", "Eel", "Egret", "Elephant", "Elk", "Ermine", "Ferret", "Finch", "Firefly", "Flamingo", "Foal", "Frog", "Gazelle", "Gecko", "Gopher", "Grasshopper", "Gull", "Hart", "Hedgehog", "Herring", "Hornet", "Hummingbird", "Hyena", "Ibex", "Ibis", "Jackal", "Jaguar", "Jay", "Kestrel", "Kingfisher", "Kite", "Lemur", "Leopard", "Lizard", "Lobster", "Locust", "Lynx", "Magpie", "Mantis", "Mare", "Marten", "Mayfly", "Mink", "Minnow", "Mockingbird", "Mole", "Mongoose", "Monkey", "Moose", "Moth", "Mule", "Newt", "Nightingale", "Nightjar", "Octopus", "Orca", "Osprey", "Panda", "Panther", "Peacock", "Pelican", "Pheasant", "Pigeon", "Pike", "Porcupine", "Puma", "Python", "Quail", "Raiton", "Ram", "Rat", "Ray", "Reindeer", "Rook", "Sable", "Salamander", "Salmon", "Scarab", "Scorpion", "Seahorse", "Seal", "Shark", "Sheep", "Shrike", "Shrimp", "Silkworm", "Sloth", "Snail", "Snake", "Snipe", "Sole", "Spider", "Squid", "Squirrel", "Stallion", "Starling", "Stoat", "Stork", "Strix", "Thrush", "Toad", "Tortoise", "Trout", "Tuna", "Turtle", "Viper", "Vulture", "Wasp", "Weasel", "Whale", "Wolverine", "Woodpecker", "Worm", "Yak", "Aardvark", "Alligator", "Ass", "Austrech", "Basilisk", "Bearcat", "Behemoth", "Centipede", "Clam", "Claw Strider", "Cormorant", "Crocodile", "Flea", "Flock", "Giraffe", "Griffin", "Hippopotamus", "Housefly", "Hybroc", "Jackalope", "Jellyfish", "Kangaroo", "Kirin", "Koala", "Leech", "Leviathan", "Llama", "Mammoth", "Manatee", "Mastodon", "Millipede", "Narwhal", "Oyster", "Penguin", "Phoenix", "Piranha", "Possum", "Prairie Dog", "Raccoon", "Rhinoceros", "River Dragon", "Sardine", "Siaka", "Simhata", "Smelt", "Starfish", "Tick", "Tigress", "Tyrant Lizard", "Unicorn", "Wallaby", "Walrus", "Wyvern", "Yeddim", "Zebra"], "body_parts": ["Belly", "Breath", "Claw", "Eye", "Face", "Fang", "Feather", "Fist", "Foot", "Hand", "Heart", "Hoof", "Horn", "Mane", "Palm", "Paw", "Tail", "Tongue", "Tooth", "Voice", "Wing", "Antler", "Beak", "Brow", "Chest", "Ear", "Fin", "Finger", "Hide", "Jaw", "Limb", "Lips", "Maw", "Mouth", "Pelt", "Scale", "Shadow", "Shell", "Shoulder", "Skull", "Spine", "Spur", "Sting", "Talon", "Tear", "Throat", "Tusk", "Vein", "Whisker", "Ankle", "Arms", "Back", "Blood", "Bone", "Carapace", "Cheek", "Chin", "Elbow", "Gut", "Hair", "Haunch", "Heel", "Hip", "Knee", "Knuckle", "Leg", "Marrow", "Muzzle", "Nose", "Rib", "Skin", "Snout", "Thumb", "Toe", "Trunk", "Visage", "Wrist"], "cardinals": ["Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Twelve", "Hundred", "Thousand", "One", "Eleven", "Dozen", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Score", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety", "Hundred and One", "Five Hundred", "Thousand and One", "Myriad", "Ten Thousand", "Hundred Thousand", "Million", "Twenty-One", "Twenty-Two", "Twenty-Four", "Twenty-Five", "Twenty-Seven", "Thirty-Three", "Thirty-Six", "Thirty-Nine", "Forty-Two", "Forty-Eight", "Fifty-Five", "Three Score", "Sixty-Four", "Sixty-Six", "Sixty-Nine", "Seventy-Six", "Four Score", "Four Score and Seven", "Eighty-Eight", "Ninety-Nine", "Hundred and Eight", "Hundred and Eleven", "Gross", "Hundred and Forty-Four", "Three Hundred", "Three Hundred and Sixty-Five", "Four Hundred and Four", "Four Hundred and Twenty", "Four Hundred and Forty-Four", "Four Hundred and Fifty-One", "Six Hundred and Sixty-Six", "Seven Hundred and Seventy-Seven", "Eight Hundred", "Nine Hundred and Ninety-Nine", "Four Thousand", "Nine Thousand", "Nine Thousand and One", "Twenty Thousand", "Umpteen"], "colors": ["Amber", "Azure", "Black", "Blue", "Crimson", "Emerald", "Gold", "Golden", "Gray", "Green", "Indigo", "Pale", "Pearl", "Red", "Ruby", "Saffron", "Scarlet", "Silver", "Violet", "White", "Yellow", "Amethyst", "Auburn", "Burgundy", "Carmine", "Cerulean", "Charcoal", "Cinnabar", "Citrine", "Cobalt", "Dun", "Dusky", "Ebon", "Fawn", "Jet", "Maroon", "Ochre", "Olive", "Orange", "Purple", "Rouge", "Ruddy", "Russet", "Rust", "Sanguine", "Sapphire", "Sienna", "Slate", "Smoke", "Sorrel", "Tawny", "Umber", "Verdant", "Vermilion", "Viridian", "Wine", "Alabaster", "Argent", "Celadon", "Cerise", "Cream", "Cyan", "Fuchsia", "Gilt", "Hazel", "Lavender", "Lilac", "Magenta", "Mauve", "Murrey", "Pallid", "Peach", "Pink", "Primrose", "Tan", "Teal", "Turquoise", "Wan"], "concepts": ["Blessing", "Hymn", "Name", "Oath", "Path", "Prayer", "Secret", "Song", "Vision", "Way", "Whisper", "Chant", "Charm", "Curse", "Dirge", "Lament", "Mantra", "Serenade", "Doctrine", "Dominion", "Enchantment", "Epiphany", "Hex", "Incantation", "Invocation", "Judgement", "Litany", "Mandate", "Mien", "Oration", "Reign", "Revelation", "Shout", "Symphony", "Utterance", "Verdict", "Whistle"], "epithets": ["Bargain", "Dance", "Embrace", "Feat", "Game", "Gaze", "Kiss", "Purpose", "Wisdom", "Wonder", "Wrath", "Ceremony", "Flourish", "Insight", "Jealousy", "Pursuit", "Terror", "Trick", "Ambush", "Awareness", "Certainty", "Convocation", "Discipline", "Elegance", "Homage", "Instinct", "Intent", "Intuition", "Mastery", "Onslaught", "Poise", "Presence", "Redemption", "Resplendence", "Righteousness", "Stratagem", "Theft", "Undoing", "Vice", "Virtue", "Volley"], "gerunds": ["Arriving", "Blossoming", "Burning", "Dancing", "Dawning", "Dreaming", "Fading", "Falling", "Fighting", "Flying", "Gathering", "Guarding", "Howling", "Hunting", "Laughing", "Leaping", "Riding", "Rising", "Roaring", "Running", "Sailing", "Shining", "Singing", "Sleeping", "Soaring", "Waiting", "Wandering", "Watching", "Weeping", "Whispering", "Advancing", "Ambushing", "Ascending", "Assaulting", "Bargaining", "Binding", "Biting", "Bleeding", "Blessing", "Blocking", "Breathing", "Bursting", "Calling", "Changing", "Chanting", "Charging", "Clawing", "Commanding", "Crowning", "Crushing", "Cursing", "Cutting", "Demanding", "Denying", "Digging", "Disguising", "Echoing", "Eclipsing", "Embracing", "Enchanting", "Entangling", "Evading", "Flaming", "Flashing", "Flickering", "Flooding", "Flourishing", "Flowering", "Freezing", "Gazing", "Glancing", "Glittering", "Grasping", "Gripping", "Growing", "Gusting", "Hallowing", "Inspiring", "Invoking", "Judging", "Kissing", "Laboring", "Lamenting", "Lunging", "Marching", "Marking", "Mastering", "Meditating", "Observing", "Pouncing", "Praying", "Preserving", "Protecting", "Pursuing", "Raining", "Raising", "Reaching", "Reigning", "Releasing", "Revealing", "Sealing", "Serenading", "Shadowing", "Shielding", "Shouting", "Slashing", "Snowing", "Spiraling", "Staring", "Stealing", "Storming", "Striding", "Striking", "Teaching", "Throwing", "Thundering", "Touching", "Trampling", "Undoing", "Veiling", "Warding", "Warning", "Weaving", "Whistling", "Wondering", "Barring", "Beclouding", "Commingling", "Condemning", "Contusing", "Culling", "Deflecting", "Denuding", "Depriving", "Descrying", "Effusing", "Empowering", "Entombing", "Envisioning", "Expunging", "Feinting", "Gesturing", "Gifting", "Hammering", "Hexing", "Imparting", "Kicking", "Knocking", "Leering", "Marshaling", "Numbing", "Overthrowing", "Parrying", "Persuading", "Punching", "Purging", "Rebuking", "Reclaiming", "Redeeming", "Smithing", "Strutting", "Sundering", "Thieving", "Transforming", "Usurping", "Vindicating", "Yielding", "Yoking"], "material": ["Amber", "Bone", "Bronze", "Cedar", "Clay", "Copper", "Emerald", "Glass", "Gold", "Iron", "Ivory", "Jade", "Leather", "Linen", "Oak", "Pearl", "Ruby", "Salt", "Sapphire", "Silk", "Silver", "Steel", "Stone", "Wool", "Adamant", "Amethyst", "Bamboo", "Basalt", "Brass", "Coral", "Crystal", "Diamond", "Ebony", "Flint", "Fur", "Garnet", "Granite", "Hide", "Ink", "Jasper", "Lacquer", "Lapis", "Malachite", "Marble", "Moonstone", "Obsidian", "Onyx", "Opal", "Porcelain", "Quartz", "Sand", "Satin", "Slate", "Teak", "Timber", "Topaz", "Velvet", "Agate", "Beryl", "Bloodstone", "Brocade", "Carnelian", "Chalcedony", "Cobalt", "Electrum", "Felt", "Gossamer", "Hematite", "Hemp", "Iolite", "Lead", "Lodestone", "Mercury", "Nacre", "Nickel", "Paper", "Peridot", "Pewter", "Platinum", "Pyrite", "Resin", "Sandstone", "Shale", "Sinew", "Soapstone", "Sunstone", "Tallow", "Tin", "Tourmaline", "Wax", "Zinc", "Zircon"], "nature": ["Autumn", "Brook", "Cloud", "Dawn", "Dusk", "Ember", "Flame", "Frost", "Meadow", "Mist", "Moon", "Mountain", "Night", "Rain", "River", "Sea", "Sky", "Snow", "Spring", "Star", "Storm", "Summer", "Sun", "Thunder", "Tide", "Wave", "Wind", "Winter", "Breeze", "Comet", "Dune", "Eclipse", "Flood", "Fog", "Gale", "Gust", "Ice", "Lightning", "Midnight", "Morn", "Rainbow", "Shower", "Twilight", "Valley", "Aura", "Blast", "Burst", "Cyclone", "Echo", "Evening", "Flash", "Glacier", "Halo", "Heaven", "Hurricane", "Maelstrom", "Monsoon", "Morning", "Oasis", "Spiral", "Tornado", "Torrent", "Typhoon", "Wellspring"], "object": ["Arrow", "Banner", "Bell", "Blade", "Bow", "Candle", "Chime", "Cloak", "Coin", "Cup", "Drum", "Fiddle", "Hammer", "Harp", "Horn", "Key", "Lamp", "Lantern", "Lute", "Mask", "Mirror", "Needle", "Pipe", "Rattle", "Reed", "Shield", "Spear", "Staff", "Thread", "Veil", "Book", "Bugle", "Crown", "Cymbal", "Fan", "Flute", "Gate", "Gong", "Scroll", "Tambourine", "Trumpet", "Chariot", "Conch", "Diagram", "Dulcimer", "Glyph", "Lance", "Lyre", "Mace", "Noose", "Ocarina", "Pipa", "Pyre", "Rune", "Seal", "Shape", "Sigil", "Symbol", "Taiko", "Tower", "Trombone", "Vessel", "Web", "Yoke", "Zither"], "ordinals": ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth", "Twelfth", "Hundredth", "Thousandth", "Last", "Eleventh", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth", "Thirtieth", "Fortieth", "Fiftieth", "Sixtieth", "Seventieth", "Eightieth", "Ninetieth", "Hundred-and-First", "Five-Hundredth", "Thousand-and-First", "Ten-Thousandth", "Hundred-Thousandth", "Millionth", "Zeroth", "Twenty-First", "Twenty-Second", "Twenty-Fourth", "Twenty-Fifth", "Twenty-Seventh", "Thirty-Third", "Thirty-Sixth", "Thirty-Ninth", "Forty-Second", "Forty-Eighth", "Fifty-Fifth", "Sixty-Fourth", "Sixty-Sixth", "Sixty-Ninth", "Seventy-Sixth", "Eighty-Eighth", "Ninety-Ninth", "Hundred-and-Eighth", "Hundred-and-Eleventh", "Hundred-and-Forty-Fourth", "Three-Hundredth", "Three-Hundred-and-Sixty-Fifth", "Four-Hundred-and-Fourth", "Four-Hundred-and-Twentieth", "Four-Hundred-and-Forty-Fourth", "Four-Hundred-and-Fifty-First", "Six-Hundred-and-Sixty-Sixth", "Seven-Hundred-and-Seventy-Seventh", "Eight-Hundredth", "Nine-Hundred-and-Ninety-Ninth", "Four-Thousandth", "Nine-Thousandth", "Nine-Thousand-and-First", "Twenty-Thousandth", "Umpteenth", "Foremost", "Latter", "Penultimate", "Final", "Ultimate", "Hindmost"], "people": ["Archer", "Bride", "Brother", "Child", "Dancer", "Daughter", "Dreamer", "Father", "Hunter", "Laborer", "Maiden", "Monk", "Mother", "Pilgrim", "Priest", "Priestess", "Rider", "Runner", "Sailor", "Singer", "Sister", "Smith", "Son", "Stranger", "Thief", "Wanderer", "Watcher", "Weaver", "Widow", "Youth", "Bargainer", "Champion", "Chanter", "Disciple", "Guardian", "Judge", "King", "Knight", "Lady", "Lord", "Marshal", "Master", "Nobleman", "Noblewoman", "Orator", "Prince", "Princess", "Protector", "Pursuer", "Queen", "Redeemer", "Scholar", "Sentinel", "Sleeper", "Spirit", "Striker", "Teacher", "Thinker", "Usurper", "Visionary", "Warden", "Whisperer"], "plants": ["Apple", "Ash", "Aspen", "Berry", "Blossom", "Cedar", "Cherry", "Fir", "Flower", "Ivy", "Juniper", "Laurel", "Leaf", "Lemon", "Lotus", "Maple", "Oak", "Orchid", "Pear", "Pine", "Plum", "Poppy", "Rose", "Rowan", "Rue", "Sage", "Thistle", "Thorn", "Willow", "Aster", "Bamboo", "Basil", "Ebony", "Lime", "Linden", "Mushroom", "Orange", "Poplar", "Redwood", "Rosemary", "Sorrel", "Spruce", "Sycamore", "Thyme", "Baobab", "Boxwood", "Champignon", "Cottonwood", "Crimini", "Enoki", "Evergreen", "Gingko", "Hops", "Parsley", "Salvia", "Sequoia", "Soy", "Tarragon", "Teak"], "prepositions": ["Above", "After", "Against", "Before", "Beneath", "Beside", "Beyond", "Under", "Upon", "Within"]}, "weights": {"adjectives": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "animals": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "body_parts": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "cardinals": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "colors": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "concepts": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "epithets": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "gerunds": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "material": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "nature": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "object": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "ordinals": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "people": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "plants": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]}};
+  const W = DATA.lists, WEIGHTS = DATA.weights || {};   // WEIGHTS[list][i] is the draw multiplier for W[list][i]; absent means 1
+
+  // ---------- random helpers ----------
+  const rand = n => Math.floor(Math.random() * n);
+  const pick = a => a[rand(a.length)];
+  function weighted(entries) {           // entries: [[item, weight], ...]
+    const total = entries.reduce((s, e) => s + e[1], 0);
+    let r = Math.random() * total;
+    for (const [item, w] of entries) { r -= w; if (r < 0) return item; }
+    return entries[entries.length - 1][0];
+  }
+
+  // ---------- word sources ----------
+  const MODS = [
+    { id: 'adjectives', label: 'Adjectives', w: 30, tip: 'Describing words with a lofty or poetic tone, such as Harmonious, Resplendent, Wistful.' },
+    { id: 'colors',     label: 'Colors',     w: 25, tip: 'Color words, from plain Red and White to Cerulean, Saffron and Viridian.' },
+    { id: 'material',   label: 'Materials',  w: 25, tip: 'Metals, gems, stones and fabrics used as descriptors, such as Jade, Bronze, Silk, Obsidian.' },
+    { id: 'gerunds',    label: 'Gerunds',    w: 20, tip: 'Action words ending in -ing, such as Weeping, Thundering, Warding.' },
+  ].filter(m => Array.isArray(W[m.id]) && W[m.id].length);
+  const NUMS = [
+    { id: 'ordinals',  label: 'Ordinals',  tip: 'Position numbers such as First, Seventh, Hundredth, Last. Required by the Ordinal patterns and an optional lead-in in others. Tiered like every other list, so the long and silly ones stay rare.' },
+    { id: 'cardinals', label: 'Cardinals', tip: 'Counting numbers such as Two, Seven, Thousand, Dozen. Fill the [Number] slot in any pattern that shows one. Tiered like every other list, so the long and silly ones stay rare.' },
+  ].filter(n => Array.isArray(W[n.id]) && W[n.id].length);
+  const NOUNS = [
+    { id: 'animals',    label: 'Animals',    w: 18, tip: 'Beasts, birds, fish and insects, including a few from Creation such as Raiton and Strix.' },
+    { id: 'plants',     label: 'Plants',     w: 18, tip: 'Trees, flowers, herbs and fungi, such as Lotus, Cedar, Thistle, Matsutake.' },
+    { id: 'nature',     label: 'Nature',     w: 18, tip: 'Weather, seasons, skies, landscapes and times of day, such as Storm, Winter, Star, Dusk, Heaven.' },
+    { id: 'object',     label: 'Objects',    w: 16, tip: 'Made things: weapons, tools, instruments and regalia, such as Blade, Lantern, Crown, Scroll.' },
+    { id: 'body_parts', label: 'Body parts', w: 14,  tip: 'Parts of a body, human or beast, such as Hand, Fang, Wing, Heart, Shadow.' },
+    { id: 'people',     label: 'People',     w: 14, slots: ['head', 'compound', 'ordinal', 'number', 'title'],
+      tip: 'Roles, titles and kin, such as Daughter, Dancer, Hunter, Widow, Sentinel.' },
+    { id: 'concepts',   label: 'Concepts',   w: 8, slots: ['head', 'ordinal', 'number', 'target'],
+      tip: 'Abstract nouns that act like objects: oaths, songs, visions and paths, such as Prayer, Verdict, Mandate, Way. Used everywhere except hyphenated and stacked names.' },
+    { id: 'epithets',   label: 'Epithets',   w: 6,  slots: ['ordinal', 'number', 'target', 'title'],
+      tip: 'Virtues, vices and deeds, such as Wrath, Insight, Theft. Used only after an ordinal, a number, or "of", or as the title in Title of Noun: Seventh Wrath, Three Bargains, Daughter of Insight, Dance of Laurels.' },
+  ].filter(n => Array.isArray(W[n.id]) && W[n.id].length);
+  // Slots a noun list may fill. Lists without an explicit `slots` take the default set.
+  //   head     - any ordinary noun position
+  //   compound - hyphenated names and the middle of a stacked Modifier Noun Noun
+  //   ordinal  - directly after an ordinal (Seventh X)
+  //   number   - pluralised after a cardinal (Three Xs)
+  //   target   - the word after "of" (Daughter of X); only abstract lists declare this
+  //   title    - the title in Title of Noun (X of Scarlet Horses); people and epithets
+  const DEFAULT_SLOTS = ['head', 'compound', 'ordinal', 'number'];
+  const slotsOf = n => n.slots || DEFAULT_SLOTS;
+  const hasSlot = s => NOUNS.some(n => on[n.id] && slotsOf(n).includes(s));
+  const on = {};                          // id -> boolean (patterns, mods, nouns)
+
+  // Rarity mode. 'word': each word's multiplier applies directly, so a tier's share depends on its size.
+  // 'tier': pick the tier first with fixed shares, then a word within it, so every list feels the same.
+  let rarityMode = 'tier';
+  try { if (localStorage.getItem('exalted-rarity') === 'word') rarityMode = 'word'; } catch (e) {}
+  const tierOf = w => (w > 1 ? 'common' : w < 1 ? 'rare' : 'normal');
+  // Effective per-word multiplier: the tier's multiplier from CFG (editable in the Weights panel).
+  const effWeight = w => CFG.wordMult[tierOf(w)];
+
+  // Weighted index into W[list], restricted to [from, to). Lists with no weights fall back to a plain uniform pick.
+  function pickIndex(list, from, to) {
+    const L = W[list], wts = WEIGHTS[list];
+    from = from || 0; to = to == null ? L.length : to;
+    if (!wts) return from + rand(to - from);
+    if (rarityMode === 'tier') {
+      const groups = { common: [], normal: [], rare: [] };
+      for (let i = from; i < to; i++) groups[tierOf(wts[i])].push(i);
+      const present = Object.keys(groups).filter(t => groups[t].length).map(t => [groups[t], CFG.tierShares[t]]);
+      return pick(weighted(present));
+    }
+    let total = 0; for (let i = from; i < to; i++) total += effWeight(wts[i]);
+    let r = Math.random() * total;
+    for (let i = from; i < to; i++) { r -= effWeight(wts[i]); if (r < 0) return i; }
+    return to - 1;
+  }
+  const word = (list, kind) => ({ t: W[list][pickIndex(list)], k: kind });
+  const lit = t => ({ t, k: null });
+  const activeMods  = () => MODS.filter(m => on[m.id]);
+  const activeNouns = () => NOUNS.filter(n => on[n.id]);
+  const mod  = (exclude) => {
+    let pool = activeMods().filter(m => !exclude || !exclude.includes(m.id));
+    if (!pool.length) pool = activeMods();
+    const m = weighted(pool.map(m => [m, m.w]));
+    return word(m.id, m.label.toLowerCase().replace(/s$/, ''));
+  };
+  const noun = (slot, only) => {
+    slot = slot || 'head';
+    let pool = NOUNS.filter(n => on[n.id] && slotsOf(n).includes(slot) && (!only || only.includes(n.id)));
+    if (!pool.length) pool = NOUNS.filter(n => on[n.id] && slotsOf(n).includes(slot));
+    if (!pool.length) pool = NOUNS.filter(n => on[n.id] && slotsOf(n).includes('head'));
+    if (!pool.length) pool = activeNouns();
+    const n = weighted(pool.map(n => [n, n.w]));
+    return word(n.id, n.label.toLowerCase().replace(/s$/, ''));
+  };
+  const adj  = () => word('adjectives', 'adjective');
+  // Number lists use the same common / normal / rare tiers as every other list.
+  const ord  = () => word('ordinals', 'ordinal');
+  const card = () => word('cardinals', 'number');
+  const ger  = () => word('gerunds', 'gerund');
+
+  // ---------- pluraliser ----------
+  const PLURAL = {
+    Foot: 'Feet', Ox: 'Oxen', Wolf: 'Wolves', Leaf: 'Leaves', Mouth: 'Mouths', Moth: 'Moths',
+    Sheep: 'Sheep', Deer: 'Deer', Elk: 'Elk', Salmon: 'Salmon', Trout: 'Trout', Carp: 'Carp', Koi: 'Koi',
+    Bass: 'Bass', Pike: 'Pike', Tuna: 'Tuna', Herring: 'Herring', Smelt: 'Smelt', Sole: 'Sole',
+    Lips: 'Lips', Arms: 'Arms', Hops: 'Hops',
+    Bamboo: 'Bamboo', Basil: 'Basil', Parsley: 'Parsley', Rosemary: 'Rosemary', Sage: 'Sage', Thyme: 'Thyme',
+    Tarragon: 'Tarragon', Rue: 'Rue', Salvia: 'Salvia', Ebony: 'Ebony', Teak: 'Teak', Soy: 'Soy',
+    Snow: 'Snows', Rain: 'Rains', Ivy: 'Ivies',
+    Child: 'Children', Thief: 'Thieves', Tooth: 'Teeth', Heaven: 'Heavens',
+    Mouse: 'Mice', Goose: 'Geese', Bison: 'Bison', Moose: 'Moose', Reindeer: 'Reindeer', Buffalo: 'Buffalo',
+    Shrimp: 'Shrimp', Squid: 'Squid', Starfish: 'Starfish', Jellyfish: 'Jellyfish', Yeddim: 'Yeddim',
+  };
+  function plural(s) {
+    if (PLURAL[s]) return PLURAL[s];
+    if (/[^aeiou]y$/i.test(s)) return s.slice(0, -1) + 'ies';
+    if (/(s|x|z|ch|sh)$/i.test(s)) return s + 'es';
+    return s + 's';
+  }
+  const pluralNoun = (slot, only) => { const n = noun(slot || 'number', only); n.t = plural(n.t); return n; };
+
+  // The noun after "of" in Title of Noun: animals, body parts, objects and people are always plural;
+  // nature and plants are plural half the time; materials stay singular and are skipped after a number.
+  const TAIL_ALWAYS_PLURAL = ['animals', 'body_parts', 'object', 'people'];
+  const TAIL_SOMETIMES_PLURAL = ['nature', 'plants'];
+  function tailNoun(afterNumber) {
+    const pool = NOUNS.filter(n => on[n.id] && (TAIL_ALWAYS_PLURAL.includes(n.id) || TAIL_SOMETIMES_PLURAL.includes(n.id))).map(n => [n, n.w]);
+    if (on.material && !afterNumber) pool.push([{ id: 'material', label: 'Materials', w: 14 }, 14]);
+    if (!pool.length) return pluralNoun('head');
+    const n = weighted(pool);
+    const x = word(n.id, n.label.toLowerCase().replace(/s$/, ''));
+    if (afterNumber || TAIL_ALWAYS_PLURAL.includes(n.id) || (TAIL_SOMETIMES_PLURAL.includes(n.id) && Math.random() < 0.5)) x.t = plural(x.t);
+    return x;
+  }
+
+  // ---------- patterns ----------
+  // needs: 'mod' = any modifier source on; 'noun' = any noun source on; 'adj' = adjectives on; 'nature' = nature on
+  const PATTERNS = [
+    { id: 'modNoun',     label: 'Modifier Noun',             ex: 'Harmonious Jade',           w: 12, needs: ['mod', 'noun'],
+      gen: () => [mod(), noun()] },
+    { id: 'ordNoun',     label: 'Ordinal Noun',              ex: 'Seventh Crane',             w: 11, needs: ['ordinal', 'noun'],
+      gen: () => [ord(), noun('ordinal')] },
+    { id: 'ordModNoun',  label: 'Ordinal Modifier Noun',     ex: 'Third Silken Blade',        w: 8, needs: ['ordinal', 'mod', 'noun'],
+      gen: () => Math.random() < 0.2 ? [mod(), ord(), noun()] : [ord(), mod(), noun()] },
+    { id: 'nounGerund',  label: '[Number] Noun [Gerund]',        ex: 'Two Dogs Pursuing',         w: 10, needs: ['noun'],
+      gen: () => {
+        const r = on.cardinals ? Math.random() : 1;                                            // no cardinals: gerund branch only
+        if (r < 0.35) return [card(), pluralNoun('number')];                                   // Seven Ravens
+        if (r < 0.65) return [card(), pluralNoun('head'), ger()];                              // Two Dogs Pursuing
+        const parts = [noun(), ger()];                                                         // Serpent Arriving
+        if (Math.random() < 0.4 && activeMods().length) parts.unshift(mod());                  // Crimson Serpent Arriving
+        return parts;
+      } },
+    { id: 'nounOf',      label: 'Noun of Modifier Noun',     ex: 'Lotus of Weeping Iron',     w: 5,  needs: ['mod', 'noun'],
+      gen: () => [Math.random() < 0.4 ? pluralNoun('head') : noun(), lit('of'), mod(), noun()] },
+    { id: 'modNounOf',   label: '[Modifier] Noun of [the] Noun',     ex: 'Gold Star of Morn',         w: 5, needs: ['noun', 'nature'],
+      gen: () => {
+        const parts = [];
+        if (Math.random() < 0.7) { const lead = leadIn(0.4); if (lead) parts.push(lead); }
+        parts.push(noun());
+        const r = Math.random();
+        let target;
+        if (r < 0.3 && hasSlot('target')) {
+          target = noun('target');
+          // Concepts read better plural after "of" about half the time (Thief of Secrets); epithets stay singular (Daughter of Wrath).
+          if (target.k === 'concept' && Math.random() < 0.5) target.t = plural(target.t);
+          parts.push(lit('of'));
+        } else if (r < 0.65) {
+          target = word('nature', 'nature');
+          parts.push(lit(Math.random() < 0.5 ? 'of the' : 'of'));                             // Blade of the Storm / Star of Morn
+        } else {
+          target = pluralNoun('head', ['nature', 'animals', 'people', 'plants']);
+          parts.push(lit('of'));
+        }
+        parts.push(target);
+        return parts;
+      } },
+    { id: 'possessive',  label: "[Modifier] Noun's Noun",                ex: "Winter's Fang",             w: 8,  needs: ['noun'],
+      gen: () => {
+        const owner = noun();
+        owner.t += "'s";
+        const parts = [owner, noun('head', ['body_parts', 'object', 'people', 'concepts'])];
+        if (Math.random() < 0.3 && activeMods().length) parts.unshift(mod());                  // Cold Winter's Fang
+        return parts;
+      } },
+    { id: 'prep',        label: 'Noun Preposition Noun',     ex: 'Heron Beyond Twilight',     w: 6,  needs: ['noun', 'nature'],
+      gen: () => {
+        const r = Math.random();
+        const far = (r < 0.25 && hasSlot('target')) ? noun('target')
+                  : r < 0.75 ? word('nature', 'nature')
+                  : pluralNoun('head', ['nature', 'animals', 'plants', 'object']);
+        return [noun(), lit(prepWord()), far];
+      } },
+    { id: 'titleOf',     label: '[Modifier] Title of [Modifier] Noun',             ex: 'Dancer of Thirteen Crowns', w: 4,  needs: ['title', 'noun'],
+      gen: () => {
+        const parts = [];
+        if (Math.random() < 0.55) { const lead = leadIn(0.35); if (lead) parts.push(lead); }
+        parts.push(noun('title'), lit('of'));
+        const r = Math.random();
+        const afterNumber = r < 0.25 && !!on.cardinals;
+        if (afterNumber) parts.push(card());
+        else if (r < 0.6 && activeMods().some(m => m.id !== 'gerunds')) parts.push(mod(['gerunds']));
+        parts.push(tailNoun(afterNumber));
+        return parts;
+      } },
+    { id: 'modNounNoun', label: 'Modifier Noun Noun',        ex: 'Crimson Lotus Blade',       w: 7,  needs: ['mod', 'noun'],
+      gen: () => [mod(), noun('compound'), noun()] },
+    { id: 'hyphen',      label: 'Noun[-]Noun',                 ex: 'Wolf-Fang',                 w: 12,  needs: ['noun'],
+      join: () => Math.random() < 0.5 ? '-' : ' ',
+      gen: () => [noun('compound'), noun('compound')] },
+    { id: 'nounAdj',     label: 'Noun Adjective',            ex: 'Swan Ascendant',            w: 8,  needs: ['adj', 'noun'],
+      gen: () => [noun(), adj()] },
+  ];
+  // An optional lead-in word: an ordinal with probability ordChance, otherwise a modifier; null if neither source is on.
+  function leadIn(ordChance) {
+    const canOrd = !!on.ordinals, canMod = activeMods().length > 0;
+    if (!canOrd && !canMod) return null;
+    return (canOrd && (!canMod || Math.random() < ordChance)) ? ord() : mod();
+  }
+  // Prepositions come from src/prepositions.txt (tiers work there too); the fallback only covers a missing file.
+  const PREP_FALLBACK = ['Beneath', 'Beyond', 'Before', 'Against', 'Under', 'Upon', 'Within', 'Above', 'After', 'Beside'];
+  const prepWord = () => (W.prepositions && W.prepositions.length) ? W.prepositions[pickIndex('prepositions')] : pick(PREP_FALLBACK);
+
+  // ---------- editable weights ----------
+  const DEFAULTS = {
+    patterns: Object.fromEntries(PATTERNS.map(p => [p.id, p.w])),
+    mods:     Object.fromEntries(MODS.map(m => [m.id, m.w])),
+    nouns:    Object.fromEntries(NOUNS.map(n => [n.id, n.w])),
+    wordMult: { common: 2, normal: 1, rare: 0.5 },
+    tierShares: { common: 50, normal: 33, rare: 17 },
+  };
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const CFG = clone(DEFAULTS);
+  const num = (v, fallback) => (typeof v === 'number' && isFinite(v) && v >= 0 ? v : fallback);
+  function loadCfg() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('exalted-weights') || 'null'); } catch (e) {}
+    if (!saved || typeof saved !== 'object') return;
+    for (const grp of ['patterns', 'mods', 'nouns', 'wordMult', 'tierShares']) {
+      const src = saved[grp] || {};
+      for (const k of Object.keys(CFG[grp])) CFG[grp][k] = num(src[k], DEFAULTS[grp][k]);
+    }
+  }
+  function saveCfg() { try { localStorage.setItem('exalted-weights', JSON.stringify(CFG)); } catch (e) {} }
+  function applyCfg() {
+    PATTERNS.forEach(p => { p.w = CFG.patterns[p.id]; });
+    MODS.forEach(m => { m.w = CFG.mods[m.id]; });
+    NOUNS.forEach(n => { n.w = CFG.nouns[n.id]; });
+  }
+  loadCfg(); applyCfg();
+
+  const TIPS = {
+    modNoun:         'One modifier (adjective, color, material or gerund) followed by one noun.',
+    ordNoun:         'An ordinal number followed by one noun.',
+    ordModNoun:      'An ordinal, a modifier and a noun. Usually in that order, sometimes modifier first: Sinister Third Star.',
+    nounGerund:      'A noun with an optional number before it (which makes it plural) and an optional gerund after it, at least one of the two: Seven Ravens, Serpent Arriving, Two Dogs Pursuing. Without a number, a modifier may lead: Crimson Serpent Arriving.',
+    nounOf:          'A noun (sometimes plural), then "of", then a modifier and a noun.',
+    modNounNoun:     'A modifier followed by two nouns stacked together.',
+    hyphen:          'Two nouns side by side, hyphenated half the time: Wolf-Fang, Storm Crane.',
+    nounAdj:         'A noun followed by an adjective, in poetic inversion.',
+    modNounOf:       'An optional modifier or ordinal, a noun, then "of" or "of the", and a nature word, an epithet, or a plural noun: Gold Star of Morn, Weeping Blade of the Storm, Hand of the Sea.',
+    possessive:      'An owner with "\'s", then what is owned, usually a body part, object, person or concept. A modifier may lead: Cold Winter\'s Fang.',
+    prep:            'A noun, a preposition such as Beneath or Against, and a nature word, epithet or plural noun.',
+    titleOf:         'An optional modifier or ordinal, a title (a person or epithet), then "of", an optional modifier or number, and a noun, usually plural.',
+  };
+  function needMet(n) {
+    if (n === 'mod')    return activeMods().length > 0;
+    if (n === 'noun')   return activeNouns().length > 0;
+    if (n === 'adj')    return !!on.adjectives;
+    if (n === 'nature') return !!on.nature;
+    if (n === 'title')  return hasSlot('title');
+    if (n === 'ordinal')  return !!on.ordinals;
+    if (n === 'cardinal') return !!on.cardinals;
+    return true;
+  }
+  function usablePatterns() { return PATTERNS.filter(p => on[p.id] && p.needs.every(needMet)); }
+
+  function makeName() {
+    const pool = usablePatterns();
+    if (!pool.length) return null;
+    const p = weighted(pool.map(p => [p, p.w]));
+    for (let tries = 0; tries < 12; tries++) {
+      const parts = p.gen();
+      const words = parts.filter(x => x.k).map(x => x.t.toLowerCase().replace(/'s$/, '').replace(/s$/, ''));
+      if (new Set(words).size !== words.length) continue;      // no repeated word within a name
+      const joiner = typeof p.join === 'function' ? p.join() : (p.join || ' ');
+      return {
+        text: parts.map(x => x.t).join(joiner),
+        form: parts.filter(x => x.k).map(x => x.k).join(' · '),
+      };
+    }
+    return null;
+  }
+
+  // ---------- state ----------
+  let results = [];
+  let favs = [];
+  try { favs = JSON.parse(localStorage.getItem('exalted-favs') || '[]'); if (!Array.isArray(favs)) favs = []; } catch (e) { favs = []; }
+  function saveFavs() { try { localStorage.setItem('exalted-favs', JSON.stringify(favs)); } catch (e) {} }
+
+  // ---------- DOM ----------
+  const $ = id => document.getElementById(id);
+  const resultsEl = $('results'), favsEl = $('favs'), hintEl = $('hint'), toastEl = $('toast');
+
+  function chip(container, item, example, tip) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.dataset.id = item.id;
+    if (tip) b.title = tip;
+    b.setAttribute('aria-pressed', String(!!on[item.id]));
+    b.textContent = item.label;
+    if (example) { const s = document.createElement('small'); s.textContent = example; b.appendChild(s); }
+    b.addEventListener('click', () => { on[item.id] = !on[item.id]; b.setAttribute('aria-pressed', String(on[item.id])); updateHint(); });
+    container.appendChild(b);
+  }
+  function syncChips() {
+    document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(!!on[b.dataset.id])));
+    updateHint();
+  }
+  const NEED_LABEL = { mod: 'a modifier source', noun: 'a noun source', adj: 'Adjectives', nature: 'Nature', title: 'People or Epithets', ordinal: 'Ordinals', cardinal: 'Cardinals' };
+  function refreshPatternChips() {
+    document.querySelectorAll('#patterns .chip').forEach(b => {
+      const p = PATTERNS.find(x => x.id === b.dataset.id);
+      const missing = p.needs.filter(n => !needMet(n));
+      b.disabled = missing.length > 0;
+      b.title = missing.length
+        ? 'Unavailable: needs ' + missing.map(n => NEED_LABEL[n]).join(' and ') + ' turned on. ' + (TIPS[p.id] || '')
+        : (TIPS[p.id] || '');
+    });
+  }
+  function updateHint() {
+    refreshPatternChips();
+    const usable = usablePatterns().length;
+    if (!activeNouns().length) hintEl.textContent = 'Turn on at least one noun source.';
+    else if (!usable) hintEl.textContent = 'No pattern can run with these sources.';
+    else hintEl.textContent = usable + ' of ' + PATTERNS.length + ' patterns active';
+  }
+
+  const isFav = t => favs.includes(t);
+  function renderResults() {
+    resultsEl.innerHTML = '';
+    if (!results.length) {
+      const li = document.createElement('li'); li.className = 'empty'; li.textContent = 'Press Generate.'; resultsEl.appendChild(li); return;
+    }
+    for (const r of results) {
+      const li = document.createElement('li');
+      const left = document.createElement('div');
+      const nm = document.createElement('button'); nm.type = 'button'; nm.className = 'name'; nm.textContent = r.text;
+      nm.title = 'Keep this name';
+      nm.addEventListener('click', () => toggleFav(r.text));
+      const fm = document.createElement('div'); fm.className = 'form'; fm.textContent = r.form;
+      left.appendChild(nm); left.appendChild(fm);
+      const st = document.createElement('button'); st.type = 'button'; st.className = 'star' + (isFav(r.text) ? ' on' : '');
+      st.textContent = isFav(r.text) ? '◆' : '◇'; st.setAttribute('aria-label', (isFav(r.text) ? 'Remove ' : 'Keep ') + r.text);
+      st.addEventListener('click', () => toggleFav(r.text));
+      li.appendChild(left); li.appendChild(st);
+      resultsEl.appendChild(li);
+    }
+  }
+  function renderFavs() {
+    favsEl.innerHTML = '';
+    $('favcount').textContent = favs.length ? favs.length : '';
+    if (!favs.length) {
+      const li = document.createElement('li'); li.className = 'empty'; li.style.fontFamily = 'var(--body)'; li.textContent = 'Nothing kept yet.'; favsEl.appendChild(li); return;
+    }
+    for (const t of favs) {
+      const li = document.createElement('li');
+      const sp = document.createElement('span'); sp.textContent = t;
+      const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.setAttribute('aria-label', 'Remove ' + t);
+      rm.addEventListener('click', () => toggleFav(t));
+      li.appendChild(sp); li.appendChild(rm);
+      favsEl.appendChild(li);
+    }
+  }
+  function toggleFav(t) {
+    const i = favs.indexOf(t);
+    if (i >= 0) favs.splice(i, 1); else favs.push(t);
+    saveFavs(); renderFavs(); renderResults();
+  }
+
+  function generate() {
+    const n = parseInt($('count').value, 10);
+    const seen = new Set(); const out = [];
+    for (let i = 0; i < n * 4 && out.length < n; i++) {
+      const r = makeName(); if (!r) break;
+      if (seen.has(r.text)) continue;
+      seen.add(r.text); out.push(r);
+    }
+    results = out;
+    renderResults();
+  }
+
+  let toastTimer;
+  function toast(msg) { toastEl.textContent = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.textContent = ''; }, 2200); }
+  function copyAll() {
+    if (!favs.length) { toast('Nothing to copy yet.'); return; }
+    const text = favs.join('\n');
+    const fallback = () => {
+      const ta = $('seltext'); ta.value = text; ta.focus(); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      toast(ok ? 'Copied ' + favs.length + ' names.' : 'Select the list and copy it by hand.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => toast('Copied ' + favs.length + ' names.'), fallback);
+    } else fallback();
+  }
+
+  // ---------- wire up ----------
+  PATTERNS.forEach(p => { on[p.id] = true; });
+  MODS.forEach(m => { on[m.id] = true; });
+  NUMS.forEach(n => { on[n.id] = true; });
+  NOUNS.forEach(n => { on[n.id] = true; });
+  PATTERNS.forEach(p => chip($('patterns'), p, p.ex, TIPS[p.id]));
+  MODS.forEach(m => chip($('mods'), m, null, m.tip));
+  NUMS.forEach(n => chip($('nums'), n, null, n.tip));
+  NOUNS.forEach(n => chip($('nouns'), n, null, n.tip));
+  $('pat-all').addEventListener('click', () => { PATTERNS.forEach(p => { on[p.id] = true; }); syncChips(); });
+  $('pat-none').addEventListener('click', () => { PATTERNS.forEach(p => { on[p.id] = false; }); syncChips(); });
+  // ---------- weights panel ----------
+  const dlg = $('weights');
+  // One sorted bar chart per set. Each bar is a range input (drag to change); the number beside it edits the same value.
+  // opts: step (default 1), max (fixed top of scale; otherwise 1.5x the largest value), sort (default true), pct (default true).
+  function chartSection(title, rows, opts, headerExtra) {
+    opts = opts || {};
+    const step = opts.step || 1;
+    const sec = document.createElement('div'); sec.className = 'wsec';
+    const head = document.createElement('div'); head.className = 'wsec-head';
+    if (title) { const h = document.createElement('h3'); h.textContent = title; head.appendChild(h); }
+    const tools = document.createElement('span'); tools.className = 'wsec-tools';
+    if (headerExtra) tools.appendChild(headerExtra);
+    if (opts.reset) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'wreset'; b.textContent = 'default';
+      b.title = 'Reset this set to its defaults';
+      b.addEventListener('click', () => { opts.reset(); applyCfg(); saveCfg(); computeMax(); redraw(); });
+      tools.appendChild(b);
+    }
+    if (tools.childNodes.length) head.appendChild(tools);
+    if (title || tools.childNodes.length) sec.appendChild(head);
+    const body = document.createElement('div'); body.className = 'wchart'; sec.appendChild(body);
+    const items = [];
+    let rangeMax = 1;
+    const computeMax = () => {
+      if (opts.max != null) { rangeMax = opts.max; return; }
+      const biggest = Math.max(0, ...rows.map(r => r.get()));
+      rangeMax = Math.max(Math.ceil(biggest * 1.5 / step) * step, step * 10);
+    };
+    const redraw = () => {
+      const total = rows.reduce((sum, r) => sum + r.get(), 0);
+      items.forEach(it => {
+        const v = it.r.get();
+        it.range.max = String(rangeMax); it.range.value = String(v);
+        it.range.style.setProperty('--p', (100 * Math.min(1, v / rangeMax)).toFixed(1) + '%');
+        if (document.activeElement !== it.num) it.num.value = String(v);
+        it.pct.textContent = opts.pct === false ? '' : (total > 0 ? Math.round(100 * v / total) : 0) + '%';
+      });
+      if (opts.onChange) opts.onChange();
+    };
+    const sortRows = () => {};   // rows keep their default order so a set reads the same every time it is opened
+    rows.forEach(r => {
+      const row = document.createElement('div'); row.className = 'wrow';
+      const lab = document.createElement('label'); lab.htmlFor = 'w-' + r.key;
+      lab.appendChild(document.createTextNode(r.label));
+      if (r.note) { const sm = document.createElement('small'); sm.textContent = r.note; lab.appendChild(sm); }
+      const range = document.createElement('input'); range.type = 'range'; range.className = 'wbar'; range.min = '0'; range.step = String(step);
+      range.setAttribute('aria-label', r.label + ' weight');
+      const num = document.createElement('input'); num.type = 'number'; num.id = 'w-' + r.key; num.min = '0'; num.step = String(step);
+      if (opts.max != null) num.max = String(opts.max);
+      const pct = document.createElement('span'); pct.className = 'pct';
+      const commit = v => {
+        if (!isFinite(v) || v < 0) return;
+        if (opts.max != null) v = Math.min(opts.max, v);
+        r.set(v); applyCfg(); saveCfg();
+        if (v > rangeMax) computeMax();
+        redraw();
+      };
+      range.addEventListener('input', () => commit(parseFloat(range.value)));
+      num.addEventListener('input', () => commit(parseFloat(num.value)));
+      const settle = () => { computeMax(); sortRows(); redraw(); };
+      range.addEventListener('change', settle); num.addEventListener('change', settle);
+      if (r.locked) { range.disabled = true; num.disabled = true; }
+      row.appendChild(lab); row.appendChild(range); row.appendChild(num); row.appendChild(pct);
+      body.appendChild(row); items.push({ r, row, range, num, pct });
+    });
+    computeMax(); sortRows(); redraw();
+    return sec;
+  }
+
+  // How each tiered list splits its draws across common / normal / rare under the current per-word multipliers.
+  function tierSplitChart() {
+    const wrap = document.createElement('div'); wrap.className = 'splits';
+    const legend = document.createElement('div'); legend.className = 'legend';
+    [['common', 'Common'], ['normal', 'Normal'], ['rare', 'Rare']].forEach(([t, label]) => {
+      const item = document.createElement('span'); const sw = document.createElement('i'); sw.className = 'sw ' + t;
+      item.appendChild(sw); item.appendChild(document.createTextNode(label)); legend.appendChild(item);
+    });
+    wrap.appendChild(legend);
+    const rows = [];
+    [...MODS, ...NUMS, ...NOUNS].forEach(src => {
+      const wts = WEIGHTS[src.id]; if (!wts) return;
+      const row = document.createElement('div'); row.className = 'split';
+      const lab = document.createElement('span'); lab.textContent = src.label;
+      const stack = document.createElement('div'); stack.className = 'stack';
+      const segs = {};
+      ['common', 'normal', 'rare'].forEach(t => { const i = document.createElement('i'); i.className = t; stack.appendChild(i); segs[t] = i; });
+      const txt = document.createElement('span'); txt.className = 'pct';
+      row.appendChild(lab); row.appendChild(stack); row.appendChild(txt); wrap.appendChild(row);
+      rows.push({ wts, segs, txt, stack, label: src.label });
+    });
+    const redraw = () => rows.forEach(r => {
+      const mass = { common: 0, normal: 0, rare: 0 };
+      r.wts.forEach(w => { mass[tierOf(w)] += effWeight(w); });
+      const total = mass.common + mass.normal + mass.rare || 1;
+      const pct = t => Math.round(100 * mass[t] / total);
+      ['common', 'normal', 'rare'].forEach(t => { r.segs[t].style.width = (100 * mass[t] / total).toFixed(1) + '%'; r.segs[t].hidden = mass[t] === 0; });
+      r.txt.textContent = pct('common') + ' / ' + pct('normal') + ' / ' + pct('rare');
+      r.stack.title = r.label + ': common ' + pct('common') + '%, normal ' + pct('normal') + '%, rare ' + pct('rare') + '%';
+    });
+    redraw();
+    return { el: wrap, redraw };
+  }
+
+  function raritySection() {
+    const modes = document.createElement('div'); modes.className = 'chips'; modes.setAttribute('role', 'radiogroup'); modes.setAttribute('aria-label', 'Word rarity mode');
+    const holder = document.createElement('div');
+    const note = document.createElement('p'); note.className = 'hint';
+    const render = () => {
+      holder.innerHTML = '';
+      if (rarityMode === 'word') {
+        note.textContent = 'Keeps any one word from being too common or too rare: each word draws by its tier’s multiplier, so with the defaults a common word shows up twice as often as a normal one and a rare word half as often, whatever list it is in. The tier as a whole is not controlled, so in a list with many rare words you will still meet rare words often. The split below shows what each list actually produces.';
+        const split = tierSplitChart();
+        const chart = chartSection('', [
+          { key: 'mult-common', label: 'Common word', get: () => CFG.wordMult.common, set: v => { CFG.wordMult.common = v; } },
+          { key: 'mult-normal', label: 'Normal word', get: () => CFG.wordMult.normal, set: v => { CFG.wordMult.normal = v; } },
+          { key: 'mult-rare',   label: 'Rare word',   get: () => CFG.wordMult.rare,   set: v => { CFG.wordMult.rare = v; } },
+        ], { step: 0.1, max: 5, sort: false, pct: false, onChange: split.redraw });
+        holder.appendChild(chart.querySelector('.wchart'));
+        holder.appendChild(split.el);
+      } else {
+        note.textContent = 'Keeps common words common and rare words rare: these shares say how much of every list’s output comes from each tier, however many words the tier holds. Within a tier every word is equally likely, so the words of a small tier repeat more often than those of a big one.';
+        const chart = chartSection('', [
+          { key: 'share-common', label: 'Common tier', get: () => CFG.tierShares.common, set: v => { CFG.tierShares.common = v; } },
+          { key: 'share-normal', label: 'Normal tier', get: () => CFG.tierShares.normal, set: v => { CFG.tierShares.normal = v; } },
+          { key: 'share-rare',   label: 'Rare tier',   get: () => CFG.tierShares.rare,   set: v => { CFG.tierShares.rare = v; } },
+        ], { max: 100, sort: false });
+        holder.appendChild(chart.querySelector('.wchart'));
+      }
+      modes.querySelectorAll('.chip').forEach(x => { const onIt = x.dataset.mode === rarityMode; x.setAttribute('aria-pressed', String(onIt)); x.setAttribute('aria-checked', String(onIt)); });
+    };
+    [
+      { id: 'tier', label: 'Per tier', tip: 'Common words stay common and rare words stay rare, in every list.' },
+      { id: 'word', label: 'Per word', tip: 'Each word has a fixed chance against its neighbours; a tier as a whole may still dominate a list.' },
+    ].forEach(c => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.dataset.mode = c.id; b.title = c.tip; b.textContent = c.label; b.setAttribute('role', 'radio');
+      b.addEventListener('click', () => { rarityMode = c.id; try { localStorage.setItem('exalted-rarity', c.id); } catch (e) {} render(); });
+      modes.appendChild(b);
+    });
+    const sec = chartSection('Word rarity', [], { reset: () => { CFG.wordMult = clone(DEFAULTS.wordMult); CFG.tierShares = clone(DEFAULTS.tierShares); render(); } }, modes);
+    sec.classList.add('wide');
+    sec.querySelector('.wchart').remove();
+    sec.appendChild(note); sec.appendChild(holder);
+    render();
+    return sec;
+  }
+
+  function buildWeightsPanel() {
+    const grid = $('wgrid'); grid.innerHTML = '';
+    const resetGroup = grp => () => { CFG[grp] = clone(DEFAULTS[grp]); };
+    grid.appendChild(chartSection('Patterns', PATTERNS.map(p => ({ key: 'p-' + p.id, label: p.label, get: () => CFG.patterns[p.id], set: v => { CFG.patterns[p.id] = v; } })), { reset: resetGroup('patterns') }));
+    const sources = document.createElement('div'); sources.className = 'wstack';   // both source charts share one column
+    sources.appendChild(chartSection('Modifier sources', MODS.map(m => ({ key: 'm-' + m.id, label: m.label, note: W[m.id].length + ' words', get: () => CFG.mods[m.id], set: v => { CFG.mods[m.id] = v; } })), { reset: resetGroup('mods') }));
+    sources.appendChild(chartSection('Noun sources', NOUNS.map(n => ({ key: 'n-' + n.id, label: n.label, note: W[n.id].length + ' words', get: () => CFG.nouns[n.id], set: v => { CFG.nouns[n.id] = v; } })), { reset: resetGroup('nouns') }));
+    grid.appendChild(sources);
+    grid.appendChild(raritySection());
+  }
+  $('w-open').addEventListener('click', () => {
+    buildWeightsPanel();
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  });
+  // A click on the backdrop lands on the dialog element itself (the form fills it), so that closes the panel.
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  $('w-reset').addEventListener('click', () => {
+    Object.assign(CFG, clone(DEFAULTS));
+    applyCfg(); try { localStorage.removeItem('exalted-weights'); } catch (e) {}
+    buildWeightsPanel();
+  });
+
+  $('gen').addEventListener('click', generate);
+  $('copy').addEventListener('click', copyAll);
+  $('clear').addEventListener('click', () => { favs = []; saveFavs(); renderFavs(); renderResults(); toast('Cleared.'); });
+
+  function start(data) {
+    if (data && Array.isArray(data.results) && data.results.length) results = data.results; else generate();
+    if (data && typeof data.count === 'string') $('count').value = data.count;
+    updateHint(); renderResults(); renderFavs();
+  }
+  if (window.claude && window.claude.hot) {
+    window.claude.hot.snapshot(() => ({ results, count: $('count').value }));
+    if (window.claude.hot.ready) window.claude.hot.ready(start); else start(window.claude.hot.data || {});
+  } else start({});
+})();
+</script>

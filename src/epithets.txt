@@ -1,0 +1,48 @@
+# Common = simple acts and plain virtues. Rare = abstract nouns that sound like charm names.
+
+# common
+Bargain
+Dance
+Embrace
+Feat
+Game
+Gaze
+Kiss
+Purpose
+Wisdom
+Wonder
+Wrath
+
+# normal
+Ceremony
+Flourish
+Insight
+Jealousy
+Pursuit
+Terror
+Trick
+
+# rare
+Ambush
+Awareness
+Certainty
+Convocation
+Discipline
+Elegance
+Homage
+Instinct
+Intent
+Intuition
+Mastery
+Onslaught
+Poise
+Presence
+Redemption
+Resplendence
+Righteousness
+Stratagem
+Theft
+Undoing
+Vice
+Virtue
+Volley
