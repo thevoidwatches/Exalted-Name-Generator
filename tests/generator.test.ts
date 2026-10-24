@@ -94,10 +94,12 @@ describe('source chips', () => {
     }
   });
 
-  it('disable the ordinal patterns when Ordinals is off', () => {
-    const ctx = context({ off: ['ordinal'] });
-    const disabled = PATTERNS.filter((p) => missingNeeds(p, ctx).length).map((p) => p.id);
-    expect(disabled.sort()).toEqual(['ordModNoun', 'ordNoun']);
+  it('leave [Ordinal] [Modifier] Noun making Modifier Noun names when Ordinals is off', () => {
+    const results = names(context({ onlyPattern: 'ordinalModNoun', off: ['ordinal'] }), 300);
+    expect(results.length).toBeGreaterThan(280);
+    expect(results.every((n) => n.parts.length === 2 && n.parts[0].kind !== 'ordinal')).toBe(true);
+    const noLead = context({ off: ['ordinal', 'adjective', 'color', 'material', 'gerund'] });
+    expect(unavailableReason(patternById('ordinalModNoun'), noLead)).toMatch(/Ordinal needs Ordinals/);
   });
 
   it('disable [Number] Noun [Gerund/Adjective] only when neither a number nor an ending can appear', () => {
@@ -118,15 +120,15 @@ describe('source chips', () => {
 
 describe('weights', () => {
   it('never draw a pattern weighted zero', () => {
-    const ctx = { ...context(), weights: { ...DEFAULTS, patterns: { ...DEFAULTS.patterns, modNoun: 0 } } };
-    expect(activePatterns(ctx).map((p) => p.id)).not.toContain('modNoun');
-    expect(generateBatch(200, ctx).every((n) => n.patternId !== 'modNoun')).toBe(true);
+    const ctx = { ...context(), weights: { ...DEFAULTS, patterns: { ...DEFAULTS.patterns, ordinalModNoun: 0 } } };
+    expect(activePatterns(ctx).map((p) => p.id)).not.toContain('ordinalModNoun');
+    expect(generateBatch(200, ctx).every((n) => n.patternId !== 'ordinalModNoun')).toBe(true);
   });
 
   it('fall back to defaults for missing or invalid stored values', () => {
-    const merged = sanitizeWeights({ patterns: { modNoun: 3, hyphen: -1, bogus: 9 }, wordMult: 'nonsense' }, DEFAULTS);
-    expect(merged.patterns.modNoun).toBe(3);
-    expect(merged.patterns.hyphen).toBe(DEFAULTS.patterns.hyphen);
+    const merged = sanitizeWeights({ patterns: { ordinalModNoun: 3, nounPair: -1, bogus: 9 }, wordMult: 'nonsense' }, DEFAULTS);
+    expect(merged.patterns.ordinalModNoun).toBe(3);
+    expect(merged.patterns.nounPair).toBe(DEFAULTS.patterns.nounPair);
     expect(merged.patterns).not.toHaveProperty('bogus');
     expect(merged.wordMult).toEqual(DEFAULTS.wordMult);
     expect(merged.options).toEqual(DEFAULTS.options);
@@ -134,21 +136,21 @@ describe('weights', () => {
   });
 
   it('cap stored optional-part chances at 100%', () => {
-    const merged = sanitizeWeights({ options: { 'hyphen.hyphen': 250, 'possessive.lead': 40 } }, DEFAULTS);
-    expect(merged.options['hyphen.hyphen']).toBe(100);
+    const merged = sanitizeWeights({ options: { 'nounPair.hyphen': 250, 'possessive.lead': 40 } }, DEFAULTS);
+    expect(merged.options['nounPair.hyphen']).toBe(100);
     expect(merged.options['possessive.lead']).toBe(40);
   });
 
   it('reset one section without touching the others', () => {
     const changed = {
       ...DEFAULTS,
-      patterns: { ...DEFAULTS.patterns, modNoun: 1 },
+      patterns: { ...DEFAULTS.patterns, ordinalModNoun: 1 },
       categories: { ...DEFAULTS.categories, adjective: 1, animal: 1 },
     };
     const reset = resetWeightSection(changed, DEFAULTS, 'modifiers', CATEGORIES);
     expect(reset.categories.adjective).toBe(DEFAULTS.categories.adjective);
     expect(reset.categories.animal).toBe(1);
-    expect(reset.patterns.modNoun).toBe(1);
+    expect(reset.patterns.ordinalModNoun).toBe(1);
   });
 });
 
@@ -176,8 +178,9 @@ describe('optional parts', () => {
     expect(patternLabel(patternById('nounEnding'))).toBe('[Number] [Modifier] Noun [Gerund/Adjective]');
     expect(patternLabel(patternById('titleOf'))).toBe('[Modifier] Title of [Number/Modifier] Noun');
     expect(patternLabel(patternById('titleOf'), (id) => id !== 'tailNumber')).toBe('[Modifier] Title of [Modifier] Noun');
-    expect(patternLabel(patternById('hyphen'))).toBe('Noun[-]Noun');
-    expect(patternLabel(patternById('hyphen'), () => false)).toBe('Noun Noun');
+    expect(patternLabel(patternById('ordinalModNoun'))).toBe('[Ordinal] [Modifier] Noun');
+    expect(patternLabel(patternById('nounPair'))).toBe('[Modifier] Noun[-]Noun');
+    expect(patternLabel(patternById('nounPair'), () => false)).toBe('Noun Noun');
     expect(patternLabel(patternById('modModNoun'))).toBe('Adjective/Gerund Color/Material Noun');
   });
 
@@ -201,8 +204,13 @@ describe('optional parts', () => {
   });
 
   it('shape the names they belong to', () => {
-    expect(names(context({ onlyPattern: 'hyphen', off: ['hyphen.hyphen'] }), 300).some((n) => n.text.includes('-'))).toBe(false);
-    expect(names(context({ onlyPattern: 'hyphen', chances: { 'hyphen.hyphen': 100 } }), 300).every((n) => n.text.includes('-'))).toBe(true);
+    expect(names(context({ onlyPattern: 'nounPair', off: ['nounPair.hyphen'] }), 300).some((n) => n.text.includes('-'))).toBe(false);
+    const hyphenated = names(context({ onlyPattern: 'nounPair', chances: { 'nounPair.hyphen': 100, 'nounPair.modifier': 50 } }), 300);
+    expect(hyphenated.every((n) => n.text.includes('-'))).toBe(true);
+    // Only the two nouns are joined: a modifier in front stays a separate word.
+    for (const { parts, text } of hyphenated.filter((n) => n.parts.length === 3)) {
+      expect(text).toBe(`${parts[0].text} ${parts[1].text}-${parts[2].text}`);
+    }
     expect(names(context({ onlyPattern: 'possessive', off: ['possessive.lead'] }), 300).every((n) => n.parts.length === 2)).toBe(true);
     const counted = names(context({ onlyPattern: 'nounEnding', off: ['nounEnding.number'] }), 300);
     expect(counted.some((n) => n.parts.some((p) => p.kind === 'cardinal'))).toBe(false);

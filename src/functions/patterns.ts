@@ -8,31 +8,31 @@ import type { Part, Pattern } from '@/types';
  */
 export const PATTERNS: Pattern[] = [
   {
-    id: 'modNoun',
-    label: 'Modifier Noun',
-    example: 'Harmonious Jade',
-    weight: 12,
-    needs: ['modifier', 'noun'],
-    tip: 'One modifier (adjective, color, material or gerund) followed by one noun.',
-    build: (h) => [h.modifier(), h.noun()],
-  },
-  {
-    id: 'ordNoun',
-    label: 'Ordinal Noun',
-    example: 'Seventh Crane',
-    weight: 11,
-    needs: ['ordinal', 'noun'],
-    tip: 'An ordinal number followed by one noun.',
-    build: (h) => [h.ordinal(), h.noun('ordinal')],
-  },
-  {
-    id: 'ordModNoun',
-    label: 'Ordinal Modifier Noun',
+    id: 'ordinalModNoun',
+    label: '{ordinal} {modifier} Noun',
     example: 'Third Silken Blade',
-    weight: 8,
-    needs: ['ordinal', 'modifier', 'noun'],
-    tip: 'An ordinal, a modifier and a noun. Usually in that order, sometimes modifier first: Sinister Third Star.',
-    build: (h) => (h.chance(0.2) ? [h.modifier(), h.ordinal(), h.noun()] : [h.ordinal(), h.modifier(), h.noun()]),
+    weight: 31,
+    needs: ['noun'],
+    tip: 'A noun with an ordinal, a modifier or both before it: Seventh Crane, Harmonious Jade, Third Silken Blade. With both, the modifier sometimes comes first: Sinister Third Star.',
+    options: [
+      {
+        id: 'ordinal', label: 'Ordinal', chance: 60, needs: ['ordinal'],
+        tip: 'An ordinal number before the noun: Seventh Crane.',
+      },
+      {
+        id: 'modifier', label: 'Modifier', chance: 65, needs: ['modifier'],
+        tip: 'A modifier (adjective, color, material or gerund) before the noun: Harmonious Jade.',
+      },
+    ],
+    rules: [{ kind: 'atLeastOne', options: ['ordinal', 'modifier'] }],
+    build: (h, has) => {
+      // A bare ordinal takes the ordinal slot, which allows epithets (Seventh Wrath).
+      if (!has('modifier')) return [h.ordinal(), h.noun('ordinal')];
+      const modifier = h.modifier();
+      const noun = h.noun();
+      if (!has('ordinal')) return [modifier, noun];
+      return h.chance(0.2) ? [modifier, h.ordinal(), noun] : [h.ordinal(), modifier, noun];
+    },
   },
   {
     id: 'nounEnding',
@@ -187,13 +187,28 @@ export const PATTERNS: Pattern[] = [
     },
   },
   {
-    id: 'modNounNoun',
-    label: 'Modifier Noun Noun',
-    example: 'Crimson Lotus Blade',
-    weight: 7,
-    needs: ['modifier', 'noun'],
-    tip: 'A modifier followed by two nouns stacked together.',
-    build: (h) => [h.modifier(), h.noun('compound'), h.noun()],
+    id: 'nounPair',
+    label: '{modifier} Noun{hyphen}Noun',
+    example: 'Crimson Wolf-Fang',
+    weight: 19,
+    needs: ['noun'],
+    tip: 'Two nouns side by side, hyphenated half the time, sometimes with a modifier in front: Wolf-Fang, Storm Crane, Crimson Lotus Blade.',
+    options: [
+      {
+        id: 'modifier', label: 'Modifier', chance: 35, needs: ['modifier'],
+        tip: 'A modifier before the pair: Crimson Lotus Blade.',
+      },
+      {
+        id: 'hyphen', label: '-', name: 'Hyphen', chance: 50, offText: ' ',
+        tip: 'A hyphen between the nouns instead of a space: Wolf-Fang rather than Wolf Fang.',
+      },
+    ],
+    build: (h, has) => {
+      const second = h.noun('compound');
+      const parts = [h.noun('compound'), has('hyphen') ? { ...second, joinBefore: '-' } : second];
+      if (has('modifier')) parts.unshift(h.modifier());
+      return parts;
+    },
   },
   {
     id: 'modModNoun',
@@ -203,21 +218,5 @@ export const PATTERNS: Pattern[] = [
     needs: ['adjectiveOrGerund', 'colorOrMaterial', 'noun'],
     tip: 'An adjective or gerund, then a color or material, then one noun: Rusted Iron Dove, Weeping Crimson Lotus.',
     build: (h) => [h.modifier(['color', 'material']), h.modifier(['adjective', 'gerund']), h.noun()],
-  },
-  {
-    id: 'hyphen',
-    label: 'Noun{hyphen}Noun',
-    example: 'Wolf-Fang',
-    weight: 12,
-    needs: ['noun'],
-    tip: 'Two nouns side by side, hyphenated half the time: Wolf-Fang, Storm Crane.',
-    options: [
-      {
-        id: 'hyphen', label: '-', name: 'Hyphen', chance: 50, offText: ' ',
-        tip: 'A hyphen between the nouns instead of a space: Wolf-Fang rather than Wolf Fang.',
-      },
-    ],
-    joiner: (has) => (has('hyphen') ? '-' : ' '),
-    build: (h) => [h.noun('compound'), h.noun('compound')],
   },
 ];

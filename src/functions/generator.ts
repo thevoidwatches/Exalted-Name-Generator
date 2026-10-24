@@ -44,13 +44,11 @@ export function makeName(ctx: GeneratorContext, patterns: Pattern[] = PATTERNS):
   const helpers = createHelpers(ctx);
   for (let tries = 0; tries < 12; tries++) {
     const chosen = rollOptions(pattern, ctx);
-    const has = (option: string) => chosen.has(option);
-    const parts = pattern.build(helpers, has);
+    const parts = pattern.build(helpers, (option) => chosen.has(option));
     const bases = parts.flatMap((p) => (p.base ? [p.base.toLowerCase()] : []));
     if (new Set(bases).size !== bases.length) continue;
-    const joiner = pattern.joiner?.(has) ?? ' ';
     return {
-      text: parts.map((p) => p.text).join(joiner),
+      text: parts.map((p, i) => (i ? (p.joinBefore ?? ' ') : '') + p.text).join(''),
       form: parts.flatMap((p) => (p.kind ? [p.kind] : [])).join(' · '),
       patternId: pattern.id,
       parts,

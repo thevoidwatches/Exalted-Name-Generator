@@ -26,6 +26,8 @@ export interface Part {
   /** The noun slot this part was drawn for, when it is a noun. */
   slot?: Slot;
   entry?: WordEntry;
+  /** What goes between this part and the one before it. Defaults to a space; "-" joins a hyphenated pair. */
+  joinBefore?: string;
 }
 
 /** Conditions a pattern, or an optional part of one, needs before it can be used. */
@@ -113,8 +115,6 @@ export interface Pattern {
   needs: Need[];
   options?: PatternOption[];
   rules?: OptionRule[];
-  /** Separator between parts. Defaults to a space. */
-  joiner?: (has: HasOption) => string;
   build(helpers: Helpers, has: HasOption): Part[];
 }
 
