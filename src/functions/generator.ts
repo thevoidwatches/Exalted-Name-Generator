@@ -18,6 +18,10 @@ export function needMet(need: Need, ctx: GeneratorContext): boolean {
       return nounsForSlot(ctx, 'title').length > 0;
     case 'gerundOrCardinal':
       return on('gerund') || on('cardinal');
+    case 'adjectiveOrGerund':
+      return on('adjective') || on('gerund');
+    case 'colorOrMaterial':
+      return on('color') || on('material');
   }
 }
 

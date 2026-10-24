@@ -157,6 +157,15 @@ export const PATTERNS: Pattern[] = [
     build: (h) => [h.modifier(), h.noun('compound'), h.noun()],
   },
   {
+    id: 'modModNoun',
+    label: 'Adjective/Gerund Color/Material Noun',
+    example: 'Rusted Iron Dove',
+    weight: 6,
+    needs: ['adjectiveOrGerund', 'colorOrMaterial', 'noun'],
+    tip: 'An adjective or gerund, then a color or material, then one noun: Rusted Iron Dove, Weeping Crimson Lotus.',
+    build: (h) => [h.modifier(['color', 'material']), h.modifier(['adjective', 'gerund']), h.noun()],
+  },
+  {
     id: 'hyphen',
     label: 'Noun[-]Noun',
     example: 'Wolf-Fang',
@@ -186,4 +195,6 @@ export const NEED_LABELS: Record<Need, string> = {
   title: 'People or Epithets',
   ordinal: 'Ordinals',
   gerundOrCardinal: 'Gerunds or Cardinals',
+  adjectiveOrGerund: 'Adjectives or Gerunds',
+  colorOrMaterial: 'Colors or Materials',
 };

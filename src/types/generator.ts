@@ -29,7 +29,16 @@ export interface Part {
 }
 
 /** Conditions a pattern needs before it can run. */
-export type Need = 'modifier' | 'noun' | 'adjective' | 'nature' | 'title' | 'ordinal' | 'gerundOrCardinal';
+export type Need =
+  | 'modifier'
+  | 'noun'
+  | 'adjective'
+  | 'nature'
+  | 'title'
+  | 'ordinal'
+  | 'gerundOrCardinal'
+  | 'adjectiveOrGerund'
+  | 'colorOrMaterial';
 
 export interface NounOptions {
   /** Prefer these categories when any of them is on and allowed in the slot. */
