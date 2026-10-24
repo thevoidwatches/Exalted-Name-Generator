@@ -7,28 +7,36 @@ import {
   generateBatch,
   makeName,
   missingNeeds,
+  optionKeys,
+  patternLabel,
   pickEntry,
   resetWeightSection,
+  rollOptions,
   sanitizeWeights,
   slotsOf,
   tierMass,
+  unavailableReason,
 } from '@/functions';
-import type { Category, GeneratedName, GeneratorContext, RarityMode } from '@/types';
+import type { Category, GeneratedName, GeneratorContext, Pattern, RarityMode } from '@/types';
 
 const DEFAULTS = defaultWeights(PATTERNS, CATEGORIES);
-const ALL_IDS = [...PATTERNS.map((p) => p.id), ...CATEGORIES.map((c) => c.id)];
+const ALL_IDS = [...PATTERNS.map((p) => p.id), ...optionKeys(PATTERNS), ...CATEGORIES.map((c) => c.id)];
 
-function context(options: { off?: string[]; onlyPattern?: string; rarityMode?: RarityMode } = {}): GeneratorContext {
+function context(
+  options: { off?: string[]; onlyPattern?: string; rarityMode?: RarityMode; chances?: Record<string, number> } = {},
+): GeneratorContext {
   const off = new Set(options.off ?? []);
   if (options.onlyPattern) PATTERNS.forEach((p) => p.id !== options.onlyPattern && off.add(p.id));
   return {
     words: WORDS,
     categories: CATEGORIES,
     enabled: Object.fromEntries(ALL_IDS.map((id) => [id, !off.has(id)])),
-    weights: DEFAULTS,
+    weights: { ...DEFAULTS, options: { ...DEFAULTS.options, ...options.chances } },
     rarityMode: options.rarityMode ?? 'tier',
   };
 }
+
+const patternById = (id: string): Pattern => PATTERNS.find((p) => p.id === id)!;
 
 function names(ctx: GeneratorContext, count: number): GeneratedName[] {
   const out: GeneratedName[] = [];
@@ -43,7 +51,7 @@ const categoryInfo = (id: Category) => CATEGORIES.find((c) => c.id === id)!;
 
 describe('every pattern', () => {
   for (const pattern of PATTERNS) {
-    describe(pattern.label, () => {
+    describe(patternLabel(pattern), () => {
       const results = names(context({ onlyPattern: pattern.id }), 400);
 
       it('produces names', () => {
@@ -92,11 +100,13 @@ describe('source chips', () => {
     expect(disabled.sort()).toEqual(['ordModNoun', 'ordNoun']);
   });
 
-  it('disable [Number] Noun [Gerund] only when Gerunds and Cardinals are both off', () => {
-    const pattern = PATTERNS.find((p) => p.id === 'nounGerund')!;
-    expect(missingNeeds(pattern, context({ off: ['gerund'] }))).toEqual([]);
-    expect(missingNeeds(pattern, context({ off: ['cardinal'] }))).toEqual([]);
-    expect(missingNeeds(pattern, context({ off: ['gerund', 'cardinal'] }))).toEqual(['gerundOrCardinal']);
+  it('disable [Number] Noun [Gerund/Adjective] only when neither a number nor an ending can appear', () => {
+    const pattern = patternById('nounEnding');
+    expect(unavailableReason(pattern, context({ off: ['cardinal'] }))).toBeNull();
+    expect(unavailableReason(pattern, context({ off: ['adjective', 'gerund'] }))).toBeNull();
+    expect(unavailableReason(pattern, context({ off: ['cardinal', 'adjective', 'gerund'] }))).toMatch(/Number needs Cardinals/);
+    expect(unavailableReason(pattern, context({ off: ['nounEnding.number', 'nounEnding.ending'] }))).toMatch(/switched off/);
+    expect(activePatterns(context({ off: ['nounEnding.number', 'nounEnding.ending'] })).map((p) => p.id)).not.toContain('nounEnding');
   });
 
   it('need People or Epithets for Title of Noun', () => {
@@ -119,7 +129,14 @@ describe('weights', () => {
     expect(merged.patterns.hyphen).toBe(DEFAULTS.patterns.hyphen);
     expect(merged.patterns).not.toHaveProperty('bogus');
     expect(merged.wordMult).toEqual(DEFAULTS.wordMult);
+    expect(merged.options).toEqual(DEFAULTS.options);
     expect(sanitizeWeights(null, DEFAULTS)).toEqual(DEFAULTS);
+  });
+
+  it('cap stored optional-part chances at 100%', () => {
+    const merged = sanitizeWeights({ options: { 'hyphen.hyphen': 250, 'possessive.lead': 40 } }, DEFAULTS);
+    expect(merged.options['hyphen.hyphen']).toBe(100);
+    expect(merged.options['possessive.lead']).toBe(40);
   });
 
   it('reset one section without touching the others', () => {
@@ -132,6 +149,93 @@ describe('weights', () => {
     expect(reset.categories.adjective).toBe(DEFAULTS.categories.adjective);
     expect(reset.categories.animal).toBe(1);
     expect(reset.patterns.modNoun).toBe(1);
+  });
+});
+
+describe('optional parts', () => {
+  const rollShares = (pattern: Pattern, ctx: GeneratorContext, [a, b]: [string, string], draws = 20000) => {
+    const counts = { onlyA: 0, onlyB: 0, both: 0, neither: 0 };
+    for (let i = 0; i < draws; i++) {
+      const chosen = rollOptions(pattern, ctx);
+      if (chosen.has(a) && chosen.has(b)) counts.both++;
+      else if (chosen.has(a)) counts.onlyA++;
+      else if (chosen.has(b)) counts.onlyB++;
+      else counts.neither++;
+    }
+    return { onlyA: counts.onlyA / draws, onlyB: counts.onlyB / draws, both: counts.both / draws, neither: counts.neither / draws };
+  };
+
+  it('each appear exactly once in their pattern label', () => {
+    for (const pattern of PATTERNS) {
+      const placed = [...pattern.label.matchAll(/\{([^}]+)\}/g)].flatMap((m) => m[1].split('/'));
+      expect(placed.sort(), pattern.id).toEqual((pattern.options ?? []).map((o) => o.id).sort());
+    }
+  });
+
+  it('show in brackets, and drop out of the label when they cannot appear', () => {
+    expect(patternLabel(patternById('nounEnding'))).toBe('[Number] [Modifier] Noun [Gerund/Adjective]');
+    expect(patternLabel(patternById('titleOf'))).toBe('[Modifier] Title of [Number/Modifier] Noun');
+    expect(patternLabel(patternById('titleOf'), (id) => id !== 'tailNumber')).toBe('[Modifier] Title of [Modifier] Noun');
+    expect(patternLabel(patternById('hyphen'))).toBe('Noun[-]Noun');
+    expect(patternLabel(patternById('hyphen'), () => false)).toBe('Noun Noun');
+    expect(patternLabel(patternById('modModNoun'))).toBe('Adjective/Gerund Color/Material Noun');
+  });
+
+  it('never appear when switched off', () => {
+    for (const pattern of PATTERNS) {
+      for (const option of pattern.options ?? []) {
+        const ctx = context({ off: [`${pattern.id}.${option.id}`] });
+        for (let i = 0; i < 300; i++) expect(rollOptions(pattern, ctx).has(option.id), `${pattern.id}.${option.id}`).toBe(false);
+      }
+    }
+  });
+
+  it('always appear at 100%, unless a rule pairs them', () => {
+    for (const pattern of PATTERNS) {
+      const ruled = new Set((pattern.rules ?? []).flatMap((r) => r.options));
+      for (const option of (pattern.options ?? []).filter((o) => !ruled.has(o.id))) {
+        const ctx = context({ chances: { [`${pattern.id}.${option.id}`]: 100 } });
+        for (let i = 0; i < 300; i++) expect(rollOptions(pattern, ctx).has(option.id), `${pattern.id}.${option.id}`).toBe(true);
+      }
+    }
+  });
+
+  it('shape the names they belong to', () => {
+    expect(names(context({ onlyPattern: 'hyphen', off: ['hyphen.hyphen'] }), 300).some((n) => n.text.includes('-'))).toBe(false);
+    expect(names(context({ onlyPattern: 'hyphen', chances: { 'hyphen.hyphen': 100 } }), 300).every((n) => n.text.includes('-'))).toBe(true);
+    expect(names(context({ onlyPattern: 'possessive', off: ['possessive.lead'] }), 300).every((n) => n.parts.length === 2)).toBe(true);
+    const counted = names(context({ onlyPattern: 'nounEnding', off: ['nounEnding.number'] }), 300);
+    expect(counted.some((n) => n.parts.some((p) => p.kind === 'cardinal'))).toBe(false);
+  });
+
+  it('give an at-least-one pair its chances, overlapping only as much as they must', () => {
+    const pattern = patternById('nounEnding');
+    const shares = rollShares(pattern, context(), ['number', 'ending']);
+    expect(shares.neither).toBe(0);
+    expect(shares.both).toBeCloseTo(0.15, 1);
+    expect(shares.onlyA).toBeCloseTo(0.2, 1);
+    expect(shares.onlyB).toBeCloseTo(0.65, 1);
+  });
+
+  it('scale an at-least-one pair up to 100% when its chances fall short', () => {
+    const ctx = context({ chances: { 'nounEnding.number': 20, 'nounEnding.ending': 30 } });
+    const shares = rollShares(patternById('nounEnding'), ctx, ['number', 'ending']);
+    expect(shares.neither).toBe(0);
+    expect(shares.both).toBe(0);
+    expect(shares.onlyA).toBeCloseTo(0.4, 1);
+  });
+
+  it('never give both parts of an at-most-one pair, scaling them down when they overflow', () => {
+    const pattern = patternById('titleOf');
+    const shares = rollShares(pattern, context(), ['tailNumber', 'tailModifier']);
+    expect(shares.both).toBe(0);
+    expect(shares.onlyA).toBeCloseTo(0.25, 1);
+    expect(shares.neither).toBeCloseTo(0.4, 1);
+    const ctx = context({ chances: { 'titleOf.tailNumber': 75, 'titleOf.tailModifier': 75 } });
+    const scaled = rollShares(pattern, ctx, ['tailNumber', 'tailModifier']);
+    expect(scaled.both).toBe(0);
+    expect(scaled.neither).toBe(0);
+    expect(scaled.onlyA).toBeCloseTo(0.5, 1);
   });
 });
 

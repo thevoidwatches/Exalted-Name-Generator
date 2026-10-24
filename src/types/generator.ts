@@ -28,7 +28,7 @@ export interface Part {
   entry?: WordEntry;
 }
 
-/** Conditions a pattern needs before it can run. */
+/** Conditions a pattern, or an optional part of one, needs before it can be used. */
 export type Need =
   | 'modifier'
   | 'noun'
@@ -36,7 +36,8 @@ export type Need =
   | 'nature'
   | 'title'
   | 'ordinal'
-  | 'gerundOrCardinal'
+  | 'cardinal'
+  | 'ordinalOrModifier'
   | 'adjectiveOrGerund'
   | 'colorOrMaterial';
 
@@ -72,17 +73,49 @@ export interface Helpers {
   pluralize(part: Part): Part;
 }
 
+/** An optional part of a pattern, switched on and off from its chip's menu, with a chance in the Weights panel. */
+export interface PatternOption {
+  /** Unique within its pattern. Stored settings use the key "patternId.optionId". */
+  id: string;
+  /** The text shown in brackets in the chip label, e.g. "Number". */
+  label: string;
+  /** The name in the chip's menu and the Weights panel, when the label alone would be ambiguous. */
+  name?: string;
+  tip: string;
+  /** Default chance, as a percentage, that a name includes the part. */
+  chance: number;
+  /** Sources the part needs. Without them it is left out. */
+  needs?: Need[];
+  /** What the label shows when the part is left out, for a part that replaces text rather than adding it. */
+  offText?: string;
+}
+
+/**
+ * How a pair of optional parts combine. Both share one roll, so their chances stay exact where they can.
+ *   atLeastOne - every name has one or both. Chances adding up to under 100% are scaled up to 100%.
+ *   atMostOne  - no name has both. Chances adding up to over 100% are scaled down to 100%.
+ */
+export interface OptionRule {
+  kind: 'atLeastOne' | 'atMostOne';
+  options: [string, string];
+}
+
+/** Tells a pattern whether the name being built includes one of its optional parts. */
+export type HasOption = (option: string) => boolean;
+
 export interface Pattern {
   id: string;
-  /** Chip label; [brackets] mark optional parts. */
+  /** Chip label. Optional parts are written {id}, or {a/b} for two that share one position; see patternLabel. */
   label: string;
   example: string;
   tip: string;
   weight: number;
   needs: Need[];
+  options?: PatternOption[];
+  rules?: OptionRule[];
   /** Separator between parts. Defaults to a space. */
-  joiner?: () => string;
-  build(helpers: Helpers): Part[];
+  joiner?: (has: HasOption) => string;
+  build(helpers: Helpers, has: HasOption): Part[];
 }
 
 export interface GeneratedName {

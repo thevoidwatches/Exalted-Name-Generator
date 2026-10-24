@@ -54,7 +54,27 @@ body {
 .chip:disabled:hover { border-color: var(--line); }
 .chip[aria-pressed="true"], .chip[aria-checked="true"] { background: var(--gold-soft); color: var(--fg); border-color: var(--gold); }
 .chip small { color: var(--muted); font-weight: 400; margin-left: 4px; font-style: italic; }
-.chip:focus-visible, .btn:focus-visible, select:focus-visible, .star:focus-visible, .rm:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.chip:focus-visible, .chip-more:focus-visible, .btn:focus-visible, select:focus-visible, .star:focus-visible, .rm:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* A pattern with optional parts: its chip and ▾ button read as one pill, and the menu floats below. */
+.chip-pair { position: relative; display: inline-flex; }
+.chip-pair > .chip { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.chip-more {
+  font-family: var(--ui); font-size: .85rem; line-height: 1; padding: 0 11px 0 9px; cursor: pointer;
+  border-radius: 0 999px 999px 0; border: 1px solid var(--line); border-left: 0;
+  background: var(--panel); color: var(--muted);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.chip-more:hover, .chip-more[aria-expanded="true"] { color: var(--gold); border-color: var(--gold); }
+.chip-pair.on .chip-more { background: var(--gold-soft); border-color: var(--gold); color: var(--fg); }
+.part-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 10;
+  width: max-content; max-width: min(360px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px;
+  background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--gold); border-radius: 6px;
+  box-shadow: 0 6px 18px var(--shadow);
+}
+.part-menu .hint { margin: 0; font-size: .8rem; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
 .btn {
@@ -110,6 +130,10 @@ select { font-family: var(--ui); font-size: .95rem; padding: 8px 10px; border-ra
 .wsec-head h3 { font-family: var(--ui); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
 .wsec-tools { display: inline-flex; align-items: center; gap: 12px; margin-left: auto; }
 .wsec .hint { margin: 2px 0 6px; font-size: .8rem; max-width: none; }
+.part-head { font-family: var(--ui); font-size: .9rem; font-weight: 500; margin: 0 0 2px; }
+/* The optional-part charts differ in height, so they flow down columns rather than sitting in rows with gaps. */
+.wcols { columns: 300px; column-gap: 32px; }
+.wcols > .wsec { break-inside: avoid; padding-bottom: 16px; }
 .wrow { display: grid; grid-template-columns: minmax(0, 1fr) 104px 58px 34px; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px dotted var(--line); font-size: .95rem; }
 .wrow label { min-width: 0; }
 .wrow small { color: var(--muted); font-family: var(--ui); font-size: .78rem; margin-left: 5px; }

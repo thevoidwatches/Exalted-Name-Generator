@@ -1,7 +1,8 @@
+import { optionKey } from '@/functions';
 import { TIERS } from '@/types';
 import type { CategoryInfo, Pattern, Tier, WeightConfig, WeightSection } from '@/types';
 
-/** The built-in weights: each pattern's and category's default, plus the rarity settings. */
+/** The built-in weights: each pattern's, category's and optional part's default, plus the rarity settings. */
 export function defaultWeights(patterns: readonly Pattern[], categories: readonly CategoryInfo[]): WeightConfig {
   return {
     patterns: Object.fromEntries(patterns.map((p) => [p.id, p.weight])),
@@ -10,6 +11,7 @@ export function defaultWeights(patterns: readonly Pattern[], categories: readonl
     ),
     wordMult: { common: 2, normal: 1, rare: 0.5 },
     tierShares: { common: 50, normal: 33, rare: 17 },
+    options: Object.fromEntries(patterns.flatMap((p) => (p.options ?? []).map((o) => [optionKey(p.id, o.id), o.chance]))),
   };
 }
 
@@ -18,16 +20,16 @@ const isWeight = (value: unknown): value is number =>
 
 /**
  * Merges stored weights over the defaults, keeping only known keys with valid numbers.
- * Patterns or categories added since the weights were saved get their default.
+ * Patterns, categories or optional parts added since the weights were saved get their default.
  */
 export function sanitizeWeights(raw: unknown, defaults: WeightConfig): WeightConfig {
   const saved = (raw && typeof raw === 'object' ? raw : {}) as Partial<Record<keyof WeightConfig, unknown>>;
-  const merge = <T extends Record<string, number>>(group: keyof WeightConfig, fallback: T): T => {
+  const merge = <T extends Record<string, number>>(group: keyof WeightConfig, fallback: T, max = Infinity): T => {
     const source = (saved[group] && typeof saved[group] === 'object' ? saved[group] : {}) as Record<string, unknown>;
     const out = { ...fallback };
     for (const key of Object.keys(fallback)) {
       const value = source[key];
-      if (isWeight(value)) (out as Record<string, number>)[key] = value;
+      if (isWeight(value)) (out as Record<string, number>)[key] = Math.min(max, value);
     }
     return out;
   };
@@ -36,6 +38,7 @@ export function sanitizeWeights(raw: unknown, defaults: WeightConfig): WeightCon
     categories: merge('categories', defaults.categories as Record<string, number>),
     wordMult: merge('wordMult', defaults.wordMult),
     tierShares: merge('tierShares', defaults.tierShares),
+    options: merge('options', defaults.options, 100),
   };
 }
 
@@ -49,6 +52,8 @@ export function resetWeightSection(
   switch (section) {
     case 'patterns':
       return { ...current, patterns: { ...defaults.patterns } };
+    case 'options':
+      return { ...current, options: { ...defaults.options } };
     case 'rarity':
       return { ...current, wordMult: { ...defaults.wordMult }, tierShares: { ...defaults.tierShares } };
     case 'modifiers':

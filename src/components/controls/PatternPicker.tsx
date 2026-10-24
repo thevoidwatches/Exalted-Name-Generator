@@ -1,22 +1,25 @@
-import { Chip, ChipGroup, TextButton } from '@/components';
-import { NEED_LABELS } from '@/functions';
-import type { Need, Pattern } from '@/types';
+import { useState } from 'react';
+import { ChipGroup, PatternChip, TextButton } from '@/components';
+import { optionChances, patternLabel, unavailableReason } from '@/functions';
+import type { GeneratorContext, Pattern } from '@/types';
 
 interface PatternPickerProps {
   patterns: Pattern[];
-  enabled: Record<string, boolean>;
-  /** What each pattern is missing under the current sources; a pattern missing anything is shown disabled. */
-  missing: (pattern: Pattern) => Need[];
+  /** The page state, which decides what each pattern can use and how its chip is labelled. */
+  ctx: GeneratorContext;
+  /** Toggles a pattern or optional-part id. */
   onToggle: (id: string) => void;
   onSetAll: (on: boolean) => void;
 }
 
-/** The pattern chips, with "all" and "none" shortcuts. */
-export function PatternPicker({ patterns, enabled, missing, onToggle, onSetAll }: PatternPickerProps) {
+/** The pattern chips, with "all" and "none" shortcuts. At most one chip's menu is open at a time. */
+export function PatternPicker({ patterns, ctx, onToggle, onSetAll }: PatternPickerProps) {
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
   return (
     <ChipGroup
       label="Patterns"
-      aside="[brackets] mark optional parts"
+      aside="[brackets] mark optional parts; ▾ switches them"
       actions={
         <>
           <TextButton label="all" title="Turn every pattern on" onClick={() => onSetAll(true)} />
@@ -25,19 +28,20 @@ export function PatternPicker({ patterns, enabled, missing, onToggle, onSetAll }
       }
     >
       {patterns.map((pattern) => {
-        const needs = missing(pattern);
-        const title = needs.length
-          ? `Unavailable: needs ${needs.map((n) => NEED_LABELS[n]).join(' and ')} turned on. ${pattern.tip}`
-          : pattern.tip;
+        const reason = unavailableReason(pattern, ctx);
+        const chances = optionChances(pattern, ctx);
         return (
-          <Chip
+          <PatternChip
             key={pattern.id}
-            label={pattern.label}
-            note={pattern.example}
-            pressed={!!enabled[pattern.id]}
-            disabled={needs.length > 0}
-            title={title}
-            onClick={() => onToggle(pattern.id)}
+            pattern={pattern}
+            label={patternLabel(pattern, (id) => chances[id] > 0)}
+            pressed={!!ctx.enabled[pattern.id]}
+            disabled={reason !== null}
+            title={reason ? `Unavailable: ${reason}. ${pattern.tip}` : pattern.tip}
+            ctx={ctx}
+            menuOpen={openMenu === pattern.id}
+            onToggle={onToggle}
+            onMenuChange={(open) => setOpenMenu(open ? pattern.id : null)}
           />
         );
       })}

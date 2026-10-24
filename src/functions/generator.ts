@@ -1,40 +1,39 @@
-import { PATTERNS, categoriesIn, createHelpers, nounsForSlot, pickWeighted } from '@/functions';
-import type { GeneratedName, GeneratorContext, Need, Pattern } from '@/types';
+import {
+  PATTERNS,
+  blockedRules,
+  createHelpers,
+  describeNeeds,
+  missingNeeds,
+  needMet,
+  optionKey,
+  optionMissing,
+  optionName,
+  pickWeighted,
+  rollOptions,
+} from '@/functions';
+import type { GeneratedName, GeneratorContext, Pattern, PatternOption } from '@/types';
 
-export function needMet(need: Need, ctx: GeneratorContext): boolean {
-  const on = (id: string) => !!ctx.enabled[id];
-  switch (need) {
-    case 'modifier':
-      return categoriesIn(ctx, 'modifier').some((c) => on(c.id));
-    case 'noun':
-      return categoriesIn(ctx, 'noun').some((c) => on(c.id));
-    case 'adjective':
-      return on('adjective');
-    case 'nature':
-      return on('nature');
-    case 'ordinal':
-      return on('ordinal');
-    case 'title':
-      return nounsForSlot(ctx, 'title').length > 0;
-    case 'gerundOrCardinal':
-      return on('gerund') || on('cardinal');
-    case 'adjectiveOrGerund':
-      return on('adjective') || on('gerund');
-    case 'colorOrMaterial':
-      return on('color') || on('material');
-  }
-}
-
-/** The needs a pattern is missing under the current chips; empty when it can run. */
-export function missingNeeds(pattern: Pattern, ctx: GeneratorContext): Need[] {
-  return pattern.needs.filter((need) => !needMet(need, ctx));
+/** Why a pattern can't run under the current chips, for its tooltip, or null when it can. */
+export function unavailableReason(pattern: Pattern, ctx: GeneratorContext): string | null {
+  const needs = missingNeeds(pattern, ctx);
+  if (needs.length) return `needs ${describeNeeds(needs)} turned on`;
+  const rule = blockedRules(pattern, ctx)[0];
+  if (!rule) return null;
+  const [a, b] = rule.options.map((id) => pattern.options!.find((o) => o.id === id)!);
+  const why = (option: PatternOption) => {
+    const missing = optionMissing(option, ctx);
+    if (!ctx.enabled[optionKey(pattern.id, option.id)]) return `${optionName(option)} is switched off`;
+    if (missing.length) return `${optionName(option)} needs ${describeNeeds(missing)} turned on`;
+    return `${optionName(option)} is set to 0%`;
+  };
+  return `needs ${optionName(a)} or ${optionName(b)}, but ${why(a)} and ${why(b)}`;
 }
 
 const weightOf = (pattern: Pattern, ctx: GeneratorContext) => ctx.weights.patterns[pattern.id] ?? pattern.weight;
 
 /** Patterns that are switched on, have what they need, and have a weight above zero. */
 export function activePatterns(ctx: GeneratorContext, patterns: Pattern[] = PATTERNS): Pattern[] {
-  return patterns.filter((p) => ctx.enabled[p.id] && weightOf(p, ctx) > 0 && missingNeeds(p, ctx).length === 0);
+  return patterns.filter((p) => ctx.enabled[p.id] && weightOf(p, ctx) > 0 && unavailableReason(p, ctx) === null);
 }
 
 /** Builds one name, or null if no pattern can run. Retries when a name would repeat a word. */
@@ -44,10 +43,12 @@ export function makeName(ctx: GeneratorContext, patterns: Pattern[] = PATTERNS):
   const pattern = pickWeighted(pool.map((p) => [p, weightOf(p, ctx)] as const));
   const helpers = createHelpers(ctx);
   for (let tries = 0; tries < 12; tries++) {
-    const parts = pattern.build(helpers);
+    const chosen = rollOptions(pattern, ctx);
+    const has = (option: string) => chosen.has(option);
+    const parts = pattern.build(helpers, has);
     const bases = parts.flatMap((p) => (p.base ? [p.base.toLowerCase()] : []));
     if (new Set(bases).size !== bases.length) continue;
-    const joiner = pattern.joiner?.() ?? ' ';
+    const joiner = pattern.joiner?.(has) ?? ' ';
     return {
       text: parts.map((p) => p.text).join(joiner),
       form: parts.flatMap((p) => (p.kind ? [p.kind] : [])).join(' · '),

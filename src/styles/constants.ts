@@ -22,6 +22,7 @@ export const PALETTE = {
     tierNormal: '#cfae63',
     tierRare: '#e8dcb8',
     backdrop: 'rgba(10, 16, 13, 0.5)',
+    shadow: 'rgba(10, 16, 13, 0.16)',
   },
   dark: {
     bg: '#141a17',
@@ -38,6 +39,7 @@ export const PALETTE = {
     tierNormal: '#8f7030',
     tierRare: '#4a3c1b',
     backdrop: 'rgba(10, 16, 13, 0.5)',
+    shadow: 'rgba(0, 0, 0, 0.45)',
   },
 } as const;
 

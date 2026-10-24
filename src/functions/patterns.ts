@@ -1,10 +1,10 @@
-import { chance } from '@/functions';
-import type { Need, Part, Pattern } from '@/types';
+import type { Part, Pattern } from '@/types';
 
 /*
  * Name patterns, in chip order. `weight` is the default draw weight, adjustable in the Weights panel.
- * Labels use [brackets] for optional parts. Each `build` draws its words through the helpers, which
- * respect the chips, the slot rules and the rarity settings.
+ * Optional parts are listed in `options` and written {id} in the label, which the chip shows as [Label].
+ * Each `build` draws its words through the helpers, which respect the chips, the slot rules and the
+ * rarity settings, and asks `has` which optional parts this name includes.
  */
 export const PATTERNS: Pattern[] = [
   {
@@ -35,20 +35,34 @@ export const PATTERNS: Pattern[] = [
     build: (h) => (h.chance(0.2) ? [h.modifier(), h.ordinal(), h.noun()] : [h.ordinal(), h.modifier(), h.noun()]),
   },
   {
-    id: 'nounGerund',
-    label: '[Number] Noun [Gerund]',
+    id: 'nounEnding',
+    label: '{number} {modifier} Noun {ending}',
     example: 'Two Dogs Pursuing',
-    weight: 10,
-    needs: ['noun', 'gerundOrCardinal'],
-    tip: 'A noun with an optional number before it (which makes it plural) and an optional gerund after it, at least one of the two: Seven Ravens, Serpent Arriving, Two Dogs Pursuing. Without a number, a modifier may lead: Crimson Serpent Arriving.',
-    build: (h) => {
-      const counting = h.isOn('cardinal');
-      const acting = h.isOn('gerund');
-      const r = h.roll();
-      if (counting && (!acting || r < 0.35)) return [h.cardinal(), h.noun('number', { plural: true })];
-      if (counting && r < 0.65) return [h.cardinal(), h.noun('head', { plural: true }), h.gerund()];
-      const parts = [h.noun(), h.gerund()];
-      if (h.chance(0.4) && h.anyModifier()) parts.unshift(h.modifier());
+    weight: 18,
+    needs: ['noun'],
+    tip: 'A noun with a number before it (which makes it plural), a gerund or adjective after it, or both: Seven Ravens, Swan Triumphant, Two Dogs Pursuing. A modifier may come before the noun: Crimson Serpent Arriving.',
+    options: [
+      {
+        id: 'number', label: 'Number', chance: 35, needs: ['cardinal'],
+        tip: 'A counting number before the noun, which makes it plural: Seven Ravens.',
+      },
+      {
+        id: 'modifier', label: 'Modifier', chance: 10, needs: ['modifier'],
+        tip: 'A modifier just before the noun: Crimson Serpent Arriving, Seven Silver Ravens.',
+      },
+      {
+        id: 'ending', label: 'Gerund/Adjective', chance: 80, needs: ['adjectiveOrGerund'],
+        tip: 'A gerund or adjective after the noun: Serpent Arriving, Swan Triumphant.',
+      },
+    ],
+    rules: [{ kind: 'atLeastOne', options: ['number', 'ending'] }],
+    build: (h, has) => {
+      const parts: Part[] = [];
+      if (has('number')) parts.push(h.cardinal());
+      if (has('modifier')) parts.push(h.modifier());
+      // A bare count takes the number slot, which allows epithets (Three Bargains); with an ending, any head noun.
+      parts.push(h.noun(has('number') && !has('ending') ? 'number' : 'head', { plural: has('number') }));
+      if (has('ending')) parts.push(h.modifier(['color', 'material']));
       return parts;
     },
   },
@@ -68,17 +82,25 @@ export const PATTERNS: Pattern[] = [
   },
   {
     id: 'modNounOf',
-    label: '[Modifier] Noun of [the] Noun',
+    label: '{lead} Noun of {the} Noun',
     example: 'Gold Star of Morn',
     weight: 5,
     needs: ['noun', 'nature'],
     tip: 'An optional modifier or ordinal, a noun, then "of" or "of the", and a nature word, an epithet, or a plural noun: Gold Star of Morn, Weeping Blade of the Storm, Hand of the Sea.',
-    build: (h) => {
+    options: [
+      {
+        id: 'lead', label: 'Modifier', name: 'Opening modifier', chance: 70, needs: ['ordinalOrModifier'],
+        tip: 'A modifier or ordinal before the first noun: Gold Star of Morn, Third Hand of the Sea.',
+      },
+      {
+        id: 'the', label: 'the', name: '"the"', chance: 50,
+        tip: '"of the" instead of "of", before a nature word only: Weeping Blade of the Storm.',
+      },
+    ],
+    build: (h, has) => {
       const parts: Part[] = [];
-      if (h.chance(0.7)) {
-        const lead = h.leadIn(0.4);
-        if (lead) parts.push(lead);
-      }
+      const lead = has('lead') ? h.leadIn(0.4) : null;
+      if (lead) parts.push(lead);
       parts.push(h.noun());
       const r = h.roll();
       if (r < 0.3 && h.hasSlot('target')) {
@@ -86,7 +108,7 @@ export const PATTERNS: Pattern[] = [
         // Concepts read well plural after "of" half the time (Thief of Secrets); epithets stay singular.
         parts.push(h.literal('of'), target.kind === 'concept' && h.chance(0.5) ? h.pluralize(target) : target);
       } else if (r < 0.65) {
-        parts.push(h.literal(h.chance(0.5) ? 'of the' : 'of'), h.word('nature'));
+        parts.push(h.literal(has('the') ? 'of the' : 'of'), h.word('nature'));
       } else {
         parts.push(h.literal('of'), h.noun('head', { only: ['nature', 'animal', 'person', 'plant'], plural: true }));
       }
@@ -95,15 +117,21 @@ export const PATTERNS: Pattern[] = [
   },
   {
     id: 'possessive',
-    label: "[Modifier] Noun's Noun",
+    label: "{lead} Noun's Noun",
     example: "Winter's Fang",
     weight: 8,
     needs: ['noun'],
     tip: 'An owner with "\'s", then what is owned, usually a body part, object, person or concept. A modifier may lead: Cold Winter\'s Fang.',
-    build: (h) => {
+    options: [
+      {
+        id: 'lead', label: 'Modifier', chance: 30, needs: ['modifier'],
+        tip: "A modifier before the owner: Cold Winter's Fang.",
+      },
+    ],
+    build: (h, has) => {
       const owner = h.noun();
       const parts = [{ ...owner, text: owner.text + "'s" }, h.noun('head', { only: ['body part', 'object', 'person', 'concept'] })];
-      if (h.chance(0.3) && h.anyModifier()) parts.unshift(h.modifier());
+      if (has('lead')) parts.unshift(h.modifier());
       return parts;
     },
   },
@@ -127,23 +155,34 @@ export const PATTERNS: Pattern[] = [
   },
   {
     id: 'titleOf',
-    label: '[Modifier] Title of [Modifier] Noun',
+    label: '{lead} Title of {tailNumber/tailModifier} Noun',
     example: 'Dancer of Thirteen Crowns',
     weight: 4,
     needs: ['title', 'noun'],
-    tip: 'An optional modifier or ordinal, a title (a person or epithet), then "of", an optional modifier or number, and a noun, usually plural.',
-    build: (h) => {
+    tip: 'An optional modifier or ordinal, a title (a person or epithet), then "of", an optional number or modifier, and a noun, usually plural.',
+    options: [
+      {
+        id: 'lead', label: 'Modifier', name: 'Opening modifier', chance: 55, needs: ['ordinalOrModifier'],
+        tip: 'A modifier or ordinal before the title: Seventh Daughter of Storms.',
+      },
+      {
+        id: 'tailNumber', label: 'Number', name: 'Number after "of"', chance: 25, needs: ['cardinal'],
+        tip: 'A counting number before the last noun: Dancer of Thirteen Crowns.',
+      },
+      {
+        id: 'tailModifier', label: 'Modifier', name: 'Modifier after "of"', chance: 35, needs: ['modifier'],
+        tip: 'A modifier other than a gerund before the last noun: Dancer of Scarlet Crowns.',
+      },
+    ],
+    rules: [{ kind: 'atMostOne', options: ['tailNumber', 'tailModifier'] }],
+    build: (h, has) => {
       const parts: Part[] = [];
-      if (h.chance(0.55)) {
-        const lead = h.leadIn(0.35);
-        if (lead) parts.push(lead);
-      }
+      const lead = has('lead') ? h.leadIn(0.35) : null;
+      if (lead) parts.push(lead);
       parts.push(h.noun('title'), h.literal('of'));
-      const r = h.roll();
-      const afterNumber = r < 0.25 && h.isOn('cardinal');
-      if (afterNumber) parts.push(h.cardinal());
-      else if (r < 0.6 && h.anyModifier(['gerund'])) parts.push(h.modifier(['gerund']));
-      parts.push(h.tailNoun(afterNumber));
+      if (has('tailNumber')) parts.push(h.cardinal());
+      else if (has('tailModifier') && h.anyModifier(['gerund'])) parts.push(h.modifier(['gerund']));
+      parts.push(h.tailNoun(has('tailNumber')));
       return parts;
     },
   },
@@ -167,34 +206,18 @@ export const PATTERNS: Pattern[] = [
   },
   {
     id: 'hyphen',
-    label: 'Noun[-]Noun',
+    label: 'Noun{hyphen}Noun',
     example: 'Wolf-Fang',
     weight: 12,
     needs: ['noun'],
     tip: 'Two nouns side by side, hyphenated half the time: Wolf-Fang, Storm Crane.',
-    joiner: () => (chance(0.5) ? '-' : ' '),
+    options: [
+      {
+        id: 'hyphen', label: '-', name: 'Hyphen', chance: 50, offText: ' ',
+        tip: 'A hyphen between the nouns instead of a space: Wolf-Fang rather than Wolf Fang.',
+      },
+    ],
+    joiner: (has) => (has('hyphen') ? '-' : ' '),
     build: (h) => [h.noun('compound'), h.noun('compound')],
   },
-  {
-    id: 'nounAdj',
-    label: 'Noun Adjective',
-    example: 'Swan Ascendant',
-    weight: 8,
-    needs: ['adjective', 'noun'],
-    tip: 'A noun followed by an adjective, in poetic inversion.',
-    build: (h) => [h.noun(), h.adjective()],
-  },
 ];
-
-/** How each need is described when a pattern chip is unavailable. */
-export const NEED_LABELS: Record<Need, string> = {
-  modifier: 'a modifier source',
-  noun: 'a noun source',
-  adjective: 'Adjectives',
-  nature: 'Nature',
-  title: 'People or Epithets',
-  ordinal: 'Ordinals',
-  gerundOrCardinal: 'Gerunds or Cardinals',
-  adjectiveOrGerund: 'Adjectives or Gerunds',
-  colorOrMaterial: 'Colors or Materials',
-};

@@ -9,13 +9,17 @@ import {
   WeightsDialog,
 } from '@/components';
 import { CATEGORIES, WORDS } from '@/data';
-import { PATTERNS, STORAGE_KEYS, availabilityHint, copyText, generateBatch, missingNeeds } from '@/functions';
+import { PATTERNS, STORAGE_KEYS, availabilityHint, copyText, generateBatch, optionKeys } from '@/functions';
 import { useKeptNames, useToast, useToggles, useWeights } from '@/hooks';
 import { DEFAULT_BATCH_SIZE } from '@/styles';
 import type { CategoryGroup, GeneratedName, GeneratorContext } from '@/types';
 
 const PATTERN_IDS = PATTERNS.map((p) => p.id);
-const CHIP_IDS = [...PATTERN_IDS, ...CATEGORIES.filter((c) => c.group !== 'preposition').map((c) => c.id)];
+const CHIP_IDS = [
+  ...PATTERN_IDS,
+  ...optionKeys(PATTERNS),
+  ...CATEGORIES.filter((c) => c.group !== 'preposition').map((c) => c.id),
+];
 const categoriesIn = (group: CategoryGroup) => CATEGORIES.filter((c) => c.group === group);
 
 /** The whole page: controls and results on the left, kept names on the right, and the Weights panel. */
@@ -50,8 +54,7 @@ export function App() {
           <div className="controls">
             <PatternPicker
               patterns={PATTERNS}
-              enabled={enabled}
-              missing={(pattern) => missingNeeds(pattern, ctx)}
+              ctx={ctx}
               onToggle={toggle}
               onSetAll={(on) => setMany(PATTERN_IDS, on)}
             />
@@ -86,6 +89,7 @@ export function App() {
         categories={CATEGORIES}
         words={WORDS}
         weights={weights}
+        enabled={enabled}
         rarityMode={rarityMode}
         onRarityModeChange={setRarityMode}
         onWeightChange={setWeight}

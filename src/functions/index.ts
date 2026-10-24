@@ -7,5 +7,7 @@ export * from './theme';
 export * from './picking';
 export * from './weights';
 export * from './helpers';
+export * from './needs';
+export * from './options';
 export * from './patterns';
 export * from './generator';

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { RaritySection, WeightChart } from '@/components';
+import { OptionsSection, RaritySection, WeightChart } from '@/components';
 import type { SplitRow } from '@/components';
+import { patternLabel } from '@/functions';
 import type { WeightGroup } from '@/hooks';
 import type { CategoryInfo, Pattern, RarityMode, WeightConfig, WeightSection, WordIndex } from '@/types';
 
@@ -11,6 +12,8 @@ interface WeightsDialogProps {
   categories: CategoryInfo[];
   words: WordIndex;
   weights: WeightConfig;
+  /** Chip and optional-part toggles, so the panel can mark parts that are switched off. */
+  enabled: Record<string, boolean>;
   rarityMode: RarityMode;
   onRarityModeChange: (mode: RarityMode) => void;
   onWeightChange: (group: WeightGroup, id: string, value: number) => void;
@@ -26,6 +29,7 @@ export function WeightsDialog({
   categories,
   words,
   weights,
+  enabled,
   rarityMode,
   onRarityModeChange,
   onWeightChange,
@@ -76,7 +80,7 @@ export function WeightsDialog({
           <div className="wgrid">
             <WeightChart
               title="Patterns"
-              rows={patterns.map((p) => ({ id: p.id, label: p.label, value: weights.patterns[p.id] ?? 0 }))}
+              rows={patterns.map((p) => ({ id: p.id, label: patternLabel(p), value: weights.patterns[p.id] ?? 0 }))}
               onChange={(id, value) => onWeightChange('patterns', id, value)}
               onReset={() => onResetSection('patterns')}
             />
@@ -94,6 +98,13 @@ export function WeightsDialog({
                 onReset={() => onResetSection('nouns')}
               />
             </div>
+            <OptionsSection
+              patterns={patterns}
+              weights={weights}
+              enabled={enabled}
+              onChange={(key, value) => onWeightChange('options', key, value)}
+              onReset={() => onResetSection('options')}
+            />
             <RaritySection
               mode={rarityMode}
               weights={weights}
