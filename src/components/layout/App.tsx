@@ -9,7 +9,7 @@ import {
   WeightsDialog,
 } from '@/components';
 import { CATEGORIES, WORDS } from '@/data';
-import { PATTERNS, availabilityHint, copyText, generateBatch, missingNeeds } from '@/functions';
+import { PATTERNS, STORAGE_KEYS, availabilityHint, copyText, generateBatch, missingNeeds } from '@/functions';
 import { useKeptNames, useToast, useToggles, useWeights } from '@/hooks';
 import { DEFAULT_BATCH_SIZE } from '@/styles';
 import type { CategoryGroup, GeneratedName, GeneratorContext } from '@/types';
@@ -21,7 +21,7 @@ const categoriesIn = (group: CategoryGroup) => CATEGORIES.filter((c) => c.group 
 /** The whole page: controls and results on the left, kept names on the right, and the Weights panel. */
 export function App() {
   const { weights, setWeight, resetSection, resetAll, rarityMode, setRarityMode } = useWeights();
-  const { enabled, toggle, setMany } = useToggles(CHIP_IDS);
+  const { enabled, toggle, setMany } = useToggles(STORAGE_KEYS.chips, CHIP_IDS);
   const kept = useKeptNames();
   const toast = useToast();
   const [count, setCount] = useState<number>(DEFAULT_BATCH_SIZE);

@@ -1,8 +1,9 @@
-/** Browser storage keys. Kept names and weights live only in this browser. */
+/** Browser storage keys. Kept names, chip settings and weights live only in this browser. */
 export const STORAGE_KEYS = {
   keptNames: 'exalted:kept-names',
   weights: 'exalted:weights',
   rarityMode: 'exalted:rarity-mode',
+  chips: 'exalted:chips',
 } as const;
 
 /** Reads and parses a stored value. Any failure, including blocked storage, gives the fallback. */
