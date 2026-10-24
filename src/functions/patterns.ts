@@ -140,20 +140,24 @@ export const PATTERNS: Pattern[] = [
   },
   {
     id: 'prep',
-    label: 'Noun Preposition Noun',
+    label: 'Noun Preposition {the} Noun',
     example: 'Heron Beyond Twilight',
     weight: 6,
     needs: ['noun', 'nature'],
-    tip: 'A noun, a preposition such as Beneath, Against or of, and a nature word, epithet or plural noun.',
-    build: (h) => {
+    tip: 'A noun, a preposition such as Beneath, Against or of, and a nature word (sometimes with "the"), epithet or plural noun: Heron Beyond Twilight, Wolf Beneath the Storm.',
+    options: [
+      {
+        id: 'the', label: 'the', name: '"the"', chance: 50,
+        tip: '"the" after the preposition, before a nature word only: Wolf Beneath the Storm.',
+      },
+    ],
+    build: (h, has) => {
+      const parts = [h.noun(), h.preposition()];
       const r = h.roll();
-      const far =
-        r < 0.25 && h.hasSlot('target')
-          ? h.noun('target')
-          : r < 0.75
-            ? h.word('nature')
-            : h.noun('head', { only: ['nature', 'animal', 'plant', 'object'], plural: true });
-      return [h.noun(), h.preposition(), far];
+      if (r < 0.25 && h.hasSlot('target')) parts.push(h.noun('target'));
+      else if (r < 0.75) parts.push(...(has('the') ? [h.literal('the')] : []), h.word('nature'));
+      else parts.push(h.noun('head', { only: ['nature', 'animal', 'plant', 'object'], plural: true }));
+      return parts;
     },
   },
   {

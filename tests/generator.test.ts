@@ -181,6 +181,7 @@ describe('optional parts', () => {
     expect(patternLabel(patternById('ordinalModNoun'))).toBe('[Ordinal] [Modifier] Noun');
     expect(patternLabel(patternById('nounPair'))).toBe('[Modifier] Noun[-]Noun');
     expect(patternLabel(patternById('nounPair'), () => false)).toBe('Noun Noun');
+    expect(patternLabel(patternById('prep'))).toBe('Noun Preposition [the] Noun');
     expect(patternLabel(patternById('modModNoun'))).toBe('Adjective/Gerund Color/Material Noun');
   });
 
