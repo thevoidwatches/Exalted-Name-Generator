@@ -62,8 +62,8 @@ export const CATEGORIES: CategoryInfo[] = [
   },
   {
     id: 'concept', group: 'noun', label: 'Concepts', weight: 8,
-    slots: ['head', 'ordinal', 'number', 'target'],
-    tip: 'Abstract nouns that act like objects: oaths, songs, visions and paths, such as Prayer, Verdict, Mandate, Way. Used everywhere except hyphenated and stacked names.',
+    slots: ['head', 'compound', 'ordinal', 'number', 'target'],
+    tip: 'Abstract nouns that act like objects: oaths, songs, visions and paths, such as Prayer, Verdict, Mandate, Way. Used everywhere except as the title in Title of Noun.',
   },
   {
     id: 'epithet', group: 'noun', label: 'Epithets', weight: 6,
