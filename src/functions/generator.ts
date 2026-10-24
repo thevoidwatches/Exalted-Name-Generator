@@ -73,8 +73,8 @@ export function generateBatch(count: number, ctx: GeneratorContext, patterns: Pa
 
 /** The status line beside the Generate button. */
 export function availabilityHint(ctx: GeneratorContext, patterns: Pattern[] = PATTERNS): string {
-  if (!needMet('noun', ctx)) return 'Turn on at least one noun source.';
   const active = activePatterns(ctx, patterns).length;
+  if (!active && !needMet('noun', ctx)) return 'Turn on at least one noun source.';
   if (!active) return 'No pattern can run with these sources.';
   return `${active} of ${patterns.length} patterns active`;
 }

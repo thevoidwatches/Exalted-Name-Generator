@@ -111,6 +111,13 @@ describe('source chips', () => {
     expect(activePatterns(context({ off: ['nounEnding.number', 'nounEnding.ending'] })).map((p) => p.id)).not.toContain('nounEnding');
   });
 
+  it('make noble names from a house and a personal name, whatever the noun sources', () => {
+    const nounsOff = CATEGORIES.filter((c) => c.group === 'noun').map((c) => c.id);
+    const results = names(context({ onlyPattern: 'nobleName', off: nounsOff }), 200);
+    expect(results.length).toBe(200);
+    expect(results.every((n) => n.form === 'house · personal name')).toBe(true);
+  });
+
   it('need People or Epithets for Title of Noun', () => {
     const pattern = PATTERNS.find((p) => p.id === 'titleOf')!;
     expect(missingNeeds(pattern, context({ off: ['person'] }))).toEqual([]);
@@ -264,9 +271,10 @@ describe('examples', () => {
    * ordinals, cardinals and prepositions without one are switched off.
    */
   function exampleContext(example: string, patternId: string): GeneratorContext {
-    const tokens = new Set(example.split(/[\s-]+/).map((t) => t.replace(/'s$/, '')));
-    const matches = (category: Category) =>
-      WORDS[category].filter((e) => tokens.has(e.word) || (e.plural !== null && tokens.has(e.plural)));
+    // Match whole words or phrases, so two-word names such as Alon Mursa count too.
+    const padded = ` ${example.replace(/-/g, ' ').replace(/'s\b/g, '')} `;
+    const inExample = (text: string | null) => text !== null && padded.includes(` ${text} `);
+    const matches = (category: Category) => WORDS[category].filter((e) => inExample(e.word) || inExample(e.plural));
     const words = Object.fromEntries(
       CATEGORIES.map((c) => [c.id, matches(c.id).length ? matches(c.id) : WORDS[c.id]]),
     ) as GeneratorContext['words'];

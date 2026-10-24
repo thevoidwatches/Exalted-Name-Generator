@@ -226,4 +226,13 @@ export const PATTERNS: Pattern[] = [
     tip: 'An adjective or gerund, then a color or material, then one noun: Rusted Iron Dove, Weeping Crimson Lotus.',
     build: (h) => [h.modifier(['color', 'material']), h.modifier(['adjective', 'gerund']), h.noun()],
   },
+  {
+    id: 'nobleName',
+    label: 'Surname Forename',
+    example: 'Cathak Alon Mursa',
+    weight: 9,
+    needs: [],
+    tip: 'A noble of the Realm: the name of a Great or Minor House, then a personal name. Cathak Alon Mursa, Ferem Kea.',
+    build: (h) => [h.word('house'), h.word('personal name')],
+  },
 ];

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { OptionsSection, RaritySection, WeightChart } from '@/components';
 import type { SplitRow } from '@/components';
+import { CHIP_GROUPS } from '@/data';
 import { patternLabel } from '@/functions';
 import type { WeightGroup } from '@/hooks';
 import type { CategoryInfo, Pattern, RarityMode, WeightConfig, WeightSection, WordIndex } from '@/types';
@@ -56,7 +57,7 @@ export function WeightsDialog({
       }));
 
   const splitRows: SplitRow[] = categories
-    .filter((c) => c.group !== 'preposition')
+    .filter((c) => CHIP_GROUPS.includes(c.group))
     .map((c) => ({ id: c.id, label: c.label, entries: words[c.id] }));
 
   return (

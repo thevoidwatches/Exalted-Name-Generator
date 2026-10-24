@@ -8,7 +8,7 @@ import {
   SourcePicker,
   WeightsDialog,
 } from '@/components';
-import { CATEGORIES, WORDS } from '@/data';
+import { CATEGORIES, CHIP_GROUPS, WORDS } from '@/data';
 import { PATTERNS, STORAGE_KEYS, availabilityHint, copyText, generateBatch, optionKeys } from '@/functions';
 import { useKeptNames, useToast, useToggles, useWeights } from '@/hooks';
 import { DEFAULT_BATCH_SIZE } from '@/styles';
@@ -18,7 +18,7 @@ const PATTERN_IDS = PATTERNS.map((p) => p.id);
 const CHIP_IDS = [
   ...PATTERN_IDS,
   ...optionKeys(PATTERNS),
-  ...CATEGORIES.filter((c) => c.group !== 'preposition').map((c) => c.id),
+  ...CATEGORIES.filter((c) => CHIP_GROUPS.includes(c.group)).map((c) => c.id),
 ];
 const categoriesIn = (group: CategoryGroup) => CATEGORIES.filter((c) => c.group === group);
 

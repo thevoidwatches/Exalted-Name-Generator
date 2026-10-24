@@ -1,4 +1,5 @@
 import modifiersCsv from '@/data/modifiers.csv?raw';
+import namesCsv from '@/data/names.csv?raw';
 import nounsCsv from '@/data/nouns.csv?raw';
 import numbersCsv from '@/data/numbers.csv?raw';
 import prepositionsCsv from '@/data/prepositions.csv?raw';
@@ -11,6 +12,7 @@ const SOURCES: Array<[CategoryGroup, string, string]> = [
   ['modifier', 'modifiers.csv', modifiersCsv],
   ['number', 'numbers.csv', numbersCsv],
   ['noun', 'nouns.csv', nounsCsv],
+  ['name', 'names.csv', namesCsv],
   ['preposition', 'prepositions.csv', prepositionsCsv],
 ];
 

@@ -13,10 +13,11 @@ export type NounCategory =
   | 'person'
   | 'concept'
   | 'epithet';
-export type Category = ModifierCategory | NumberCategory | NounCategory | 'preposition';
+export type NameCategory = 'house' | 'personal name';
+export type Category = ModifierCategory | NumberCategory | NounCategory | NameCategory | 'preposition';
 
 /** Which CSV a category lives in, and which chip row it appears in. */
-export type CategoryGroup = 'modifier' | 'number' | 'noun' | 'preposition';
+export type CategoryGroup = 'modifier' | 'number' | 'noun' | 'name' | 'preposition';
 
 /** One row of a word CSV. A null plural means the word is never used in a plural slot. */
 export interface WordEntry {

@@ -10,13 +10,14 @@ Click **Generate** for a batch, click a name to keep it, and **Copy all** to tak
 
 ## Editing the word lists
 
-Every word lives in one of four CSV files in `src/data/`:
+Every word lives in one of five CSV files in `src/data/`:
 
 | File | Categories |
 |---|---|
 | `modifiers.csv` | adjective, color, material, gerund |
 | `numbers.csv` | cardinal, ordinal |
 | `nouns.csv` | animal, plant, nature, object, body part, person, concept, epithet |
+| `names.csv` | house, personal name |
 | `prepositions.csv` | preposition |
 
 Each file has four columns: `word,plural,category,tier`.

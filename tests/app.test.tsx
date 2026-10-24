@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { App, WeightsDialog } from '@/components';
-import { CATEGORIES, WORDS } from '@/data';
+import { CATEGORIES, CHIP_GROUPS, WORDS } from '@/data';
 import { PATTERNS, defaultWeights, optionKeys } from '@/functions';
 
 // Rendering to HTML catches crashes and missing pieces without needing a browser.
@@ -12,7 +12,7 @@ describe('the page', () => {
 
   it('shows every pattern and source chip', () => {
     for (const pattern of PATTERNS) expect(html).toContain(escaped(pattern.example));
-    for (const category of CATEGORIES.filter((c) => c.group !== 'preposition')) expect(html).toContain(`>${category.label}<`);
+    for (const category of CATEGORIES.filter((c) => CHIP_GROUPS.includes(c.group))) expect(html).toContain(`>${category.label}<`);
   });
 
   it('starts with a batch of ten names', () => {

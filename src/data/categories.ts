@@ -1,4 +1,7 @@
-import type { CategoryInfo } from '@/types';
+import type { CategoryGroup, CategoryInfo } from '@/types';
+
+/** The groups shown as rows of source chips. Names and prepositions are drawn only by their own patterns. */
+export const CHIP_GROUPS: readonly CategoryGroup[] = ['modifier', 'number', 'noun'];
 
 /*
  * Every word category, in chip order. Edit labels, tooltips and default weights here.
@@ -69,6 +72,16 @@ export const CATEGORIES: CategoryInfo[] = [
     id: 'epithet', group: 'noun', label: 'Epithets', weight: 6,
     slots: ['ordinal', 'number', 'target', 'title'],
     tip: 'Virtues, vices and deeds, such as Wrath, Insight, Theft. Used only after an ordinal, a number, or "of", or as the title in Title of Noun: Seventh Wrath, Three Bargains, Daughter of Insight, Dance of Laurels.',
+  },
+
+  // Noble names for Surname Forename; not shown as chips.
+  {
+    id: 'house', group: 'name', label: 'Houses',
+    tip: 'The Great and Minor Houses of the Realm, such as Cathak, Ledaal, V’neef, Ferem. All drawn equally.',
+  },
+  {
+    id: 'personal name', group: 'name', label: 'Personal names',
+    tip: 'Given names for the nobility, some of them two words long, such as Kea, Alon Mursa, Belar Demi.',
   },
 
   // Joining words for Noun Preposition Noun; not shown as a chip.
