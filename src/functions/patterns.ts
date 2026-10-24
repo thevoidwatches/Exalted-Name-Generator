@@ -13,7 +13,7 @@ export const PATTERNS: Pattern[] = [
     example: 'Third Silken Blade',
     weight: 31,
     needs: ['noun'],
-    tip: 'A noun with an ordinal, a modifier or both before it: Seventh Crane, Harmonious Jade, Third Silken Blade. With both, the modifier sometimes comes first: Sinister Third Star.',
+    tip: 'A noun with an ordinal, a modifier or both before it: Seventh Crane, Harmonious Jade, Third Silken Blade. With both, the modifier sometimes comes first: Sinister Third Star. After a modifier, a material may stand as the noun: Weeping Iron.',
     options: [
       {
         id: 'ordinal', label: 'Ordinal', chance: 60, needs: ['ordinal'],
@@ -29,7 +29,7 @@ export const PATTERNS: Pattern[] = [
       // A bare ordinal takes the ordinal slot, which allows epithets (Seventh Wrath).
       if (!has('modifier')) return [h.ordinal(), h.noun('ordinal')];
       const modifier = h.modifier();
-      const noun = h.noun();
+      const noun = h.noun('head', { orMaterial: modifier.kind !== 'material' });
       if (!has('ordinal')) return [modifier, noun];
       return h.chance(0.2) ? [modifier, h.ordinal(), noun] : [h.ordinal(), modifier, noun];
     },
@@ -40,7 +40,7 @@ export const PATTERNS: Pattern[] = [
     example: 'Two Dogs Pursuing',
     weight: 18,
     needs: ['noun'],
-    tip: 'A noun with a number before it (which makes it plural), a gerund or adjective after it, or both: Seven Ravens, Swan Triumphant, Two Dogs Pursuing. A modifier may come before the noun: Crimson Serpent Arriving.',
+    tip: 'A noun with a number before it (which makes it plural), a gerund or adjective after it, or both: Seven Ravens, Swan Ascendant, Two Dogs Pursuing. A modifier may come before the noun: Crimson Serpent Arriving.',
     options: [
       {
         id: 'number', label: 'Number', chance: 35, needs: ['cardinal'],
@@ -52,7 +52,7 @@ export const PATTERNS: Pattern[] = [
       },
       {
         id: 'ending', label: 'Gerund/Adjective', chance: 80, needs: ['adjectiveOrGerund'],
-        tip: 'A gerund or adjective after the noun: Serpent Arriving, Swan Triumphant.',
+        tip: 'A gerund or adjective after the noun: Serpent Arriving, Swan Ascendant.',
       },
     ],
     rules: [{ kind: 'atLeastOne', options: ['number', 'ending'] }],
@@ -72,13 +72,16 @@ export const PATTERNS: Pattern[] = [
     example: 'Lotus of Weeping Iron',
     weight: 5,
     needs: ['modifier', 'noun'],
-    tip: 'A noun (sometimes plural), then "of", then a modifier and a noun.',
-    build: (h) => [
-      h.chance(0.4) ? h.noun('head', { plural: true }) : h.noun(),
-      h.literal('of'),
-      h.modifier(),
-      h.noun(),
-    ],
+    tip: 'A noun (sometimes plural), then "of", then a modifier and a noun or material: Lotus of Weeping Iron.',
+    build: (h) => {
+      const modifier = h.modifier();
+      return [
+        h.chance(0.4) ? h.noun('head', { plural: true }) : h.noun(),
+        h.literal('of'),
+        modifier,
+        h.noun('head', { orMaterial: modifier.kind !== 'material' }),
+      ];
+    },
   },
   {
     id: 'modNounOf',

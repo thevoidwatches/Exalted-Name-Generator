@@ -48,6 +48,8 @@ export interface NounOptions {
   only?: Category[];
   /** Draw only words that have a plural, and use the plural. */
   plural?: boolean;
+  /** Let a material stand in for the noun now and then, as in Harmonious Jade. Never for a plural. */
+  orMaterial?: boolean;
 }
 
 /** The word-drawing toolkit handed to each pattern. */

@@ -31,13 +31,19 @@ export function nounsForSlot(ctx: GeneratorContext, slot: Slot): CategoryInfo[] 
 // After "of" in Title of Noun: these are always plural, these half the time, and materials stay singular.
 const TAIL_ALWAYS_PLURAL: Category[] = ['animal', 'body part', 'object', 'person'];
 const TAIL_SOMETIMES_PLURAL: Category[] = ['nature', 'plant'];
-const TAIL_MATERIAL_WEIGHT = 14;
+
+// How strongly Materials competes with the noun sources when a material may stand as a noun (Weeping Iron).
+const MATERIAL_NOUN_WEIGHT = 14;
 
 /** Builds the word-drawing toolkit that patterns use, bound to one page state. */
 export function createHelpers(ctx: GeneratorContext): Helpers {
   const isOn = (id: string) => !!ctx.enabled[id];
   const weightOf = (c: CategoryInfo) => ctx.weights.categories[c.id] ?? c.weight ?? 0;
   const canPlural = (category: Category) => ctx.words[category].some((e) => e.plural);
+  const materialAsNoun = () => {
+    const material = ctx.categories.find((c) => c.id === 'material');
+    return !!material && isOn('material') && weightOf(material) > 0;
+  };
 
   const toPart = (entry: WordEntry, slot?: Slot): Part => ({
     text: entry.word,
@@ -89,8 +95,12 @@ export function createHelpers(ctx: GeneratorContext): Helpers {
       pool = nounPool(slot, { ...options, plural: false });
     }
     if (!pool.length) throw new Error('No noun source is turned on.');
-    const category = pickWeighted(pool.map((c) => [c, weightOf(c)] as const));
-    return { ...word(category.id, { plural }), slot };
+    const weighted: Array<readonly [Category, number]> = pool.map((c) => [c.id, weightOf(c)] as const);
+    // Materials have no plurals, so they only stand in for singular nouns. They fill no noun slot.
+    if (options?.orMaterial && !plural && materialAsNoun()) weighted.push(['material', MATERIAL_NOUN_WEIGHT]);
+    const category = pickWeighted(weighted);
+    if (category === 'material') return word('material');
+    return { ...word(category, { plural }), slot };
   };
 
   const ordinal = () => word('ordinal');
@@ -125,10 +135,7 @@ export function createHelpers(ctx: GeneratorContext): Helpers {
       const pool: Array<readonly [Category, number]> = categoriesIn(ctx, 'noun')
         .filter((c) => isOn(c.id) && [...TAIL_ALWAYS_PLURAL, ...TAIL_SOMETIMES_PLURAL].includes(c.id))
         .map((c) => [c.id, weightOf(c)] as const);
-      const material = ctx.categories.find((c) => c.id === 'material');
-      if (material && isOn('material') && weightOf(material) > 0 && !afterNumber) {
-        pool.push(['material', TAIL_MATERIAL_WEIGHT]);
-      }
+      if (materialAsNoun() && !afterNumber) pool.push(['material', MATERIAL_NOUN_WEIGHT]);
       if (!pool.length) return noun('head', { plural: true });
       const category = pickWeighted(pool);
       const plural =

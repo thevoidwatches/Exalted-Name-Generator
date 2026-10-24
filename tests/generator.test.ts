@@ -216,6 +216,15 @@ describe('optional parts', () => {
     expect(counted.some((n) => n.parts.some((p) => p.kind === 'cardinal'))).toBe(false);
   });
 
+  it('let a material stand as the last noun only after a modifier that is not itself a material', () => {
+    for (const id of ['ordinalModNoun', 'nounOf']) {
+      const results = names(context({ onlyPattern: id }), 3000);
+      const ending = (n: GeneratedName) => n.parts.slice(-2).map((p) => p.kind);
+      expect(results.some((n) => ending(n)[1] === 'material'), id).toBe(true);
+      for (const n of results) if (ending(n)[1] === 'material') expect(ending(n)[0], n.text).not.toBe('material');
+    }
+  });
+
   it('give an at-least-one pair its chances, overlapping only as much as they must', () => {
     const pattern = patternById('nounEnding');
     const shares = rollShares(pattern, context(), ['number', 'ending']);
@@ -245,6 +254,45 @@ describe('optional parts', () => {
     expect(scaled.neither).toBe(0);
     expect(scaled.onlyA).toBeCloseTo(0.5, 1);
   });
+});
+
+describe('examples', () => {
+  /*
+   * Narrows every list that holds one of the example's words to just those words. Weighted sources without
+   * one keep their words but weigh zero, so they are never drawn while a source that has one is on;
+   * ordinals, cardinals and prepositions without one are switched off.
+   */
+  function exampleContext(example: string, patternId: string): GeneratorContext {
+    const tokens = new Set(example.split(/[\s-]+/).map((t) => t.replace(/'s$/, '')));
+    const matches = (category: Category) =>
+      WORDS[category].filter((e) => tokens.has(e.word) || (e.plural !== null && tokens.has(e.plural)));
+    const words = Object.fromEntries(
+      CATEGORIES.map((c) => [c.id, matches(c.id).length ? matches(c.id) : WORDS[c.id]]),
+    ) as GeneratorContext['words'];
+    const base = context({ onlyPattern: patternId });
+    for (const c of CATEGORIES) if (c.weight === undefined && !matches(c.id).length) base.enabled[c.id] = false;
+    const categories = Object.fromEntries(
+      CATEGORIES.filter((c) => c.weight !== undefined).map((c) => [c.id, matches(c.id).length ? c.weight! : 0]),
+    );
+    return { ...base, words, weights: { ...base.weights, categories } };
+  }
+
+  const cases: Array<[string, string]> = [
+    ...PATTERNS.map((p): [string, string] => [p.id, p.example]),
+    // The page header's examples, and the inverted adjective from the tooltips.
+    ['ordinalModNoun', 'Harmonious Jade'],
+    ['ordinalModNoun', 'Seventh Crane'],
+    ['nounOf', 'Lotus of Weeping Iron'],
+    ['nounEnding', 'Swan Ascendant'],
+  ];
+
+  for (const [patternId, example] of cases) {
+    it(`can produce ${example}`, () => {
+      const ctx = exampleContext(example, patternId);
+      const seen = new Set(names(ctx, 3000).map((n) => n.text));
+      expect(seen).toContain(example);
+    });
+  }
 });
 
 describe('rarity', () => {
