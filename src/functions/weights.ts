@@ -12,6 +12,7 @@ export function defaultWeights(patterns: readonly Pattern[], categories: readonl
     wordMult: { common: 2, normal: 1, rare: 0.5 },
     tierShares: { common: 50, normal: 33, rare: 17 },
     options: Object.fromEntries(patterns.flatMap((p) => (p.options ?? []).map((o) => [optionKey(p.id, o.id), o.chance]))),
+    style: { hyphenate: 5 },
   };
 }
 
@@ -39,6 +40,7 @@ export function sanitizeWeights(raw: unknown, defaults: WeightConfig): WeightCon
     wordMult: merge('wordMult', defaults.wordMult),
     tierShares: merge('tierShares', defaults.tierShares),
     options: merge('options', defaults.options, 100),
+    style: merge('style', defaults.style, 100),
   };
 }
 
@@ -54,6 +56,8 @@ export function resetWeightSection(
       return { ...current, patterns: { ...defaults.patterns } };
     case 'options':
       return { ...current, options: { ...defaults.options } };
+    case 'style':
+      return { ...current, style: { ...defaults.style } };
     case 'rarity':
       return { ...current, wordMult: { ...defaults.wordMult }, tierShares: { ...defaults.tierShares } };
     case 'modifiers':

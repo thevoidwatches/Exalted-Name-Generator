@@ -6,7 +6,7 @@ A random name generator for NPCs in the style of Exalted: Harmonious Jade, Seven
 
 ## Using it
 
-Click **Generate** for a batch, click a name to keep it, and **Copy all** to take the kept list away. Chips turn patterns and word sources on and off. Parts of a pattern in [brackets] are optional; the ▾ beside the chip switches each one on or off. The **Weights** button opens a panel for adjusting how often each pattern, source, optional part and rarity tier is drawn. Kept names, chip settings and weights are remembered in your browser.
+Click **Generate** for a batch, click a name to keep it, and **Copy all** to take the kept list away. Chips turn patterns and word sources on and off. Parts of a pattern in [brackets] are optional; the ▾ beside the chip switches each one on or off. The **Weights** button opens a panel for adjusting how often each pattern, source, optional part and rarity tier is drawn, and how often a whole name is hyphenated. Kept names, chip settings and weights are remembered in your browser.
 
 ## Editing the word lists
 

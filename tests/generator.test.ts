@@ -32,7 +32,8 @@ function context(
     words: WORDS,
     categories: CATEGORIES,
     enabled: Object.fromEntries(ALL_IDS.map((id) => [id, !off.has(id)])),
-    weights: { ...DEFAULTS, options: { ...DEFAULTS.options, ...options.chances } },
+    // Whole-name hyphenation stays off unless a test turns it on, so checks on a name's text stay simple.
+    weights: { ...DEFAULTS, options: { ...DEFAULTS.options, ...options.chances }, style: { hyphenate: 0 } },
     rarityMode: options.rarityMode ?? 'tier',
   };
 }
@@ -254,6 +255,14 @@ describe('optional parts', () => {
       expect(results.some((n) => ending(n)[1] === 'material'), id).toBe(true);
       for (const n of results) if (ending(n)[1] === 'material') expect(ending(n)[0], n.text).not.toBe('material');
     }
+  });
+
+  it('hyphenate whole names at the style chance, but never Surname Forename', () => {
+    const always = names({ ...context(), weights: { ...DEFAULTS, style: { hyphenate: 100 } } }, 1000);
+    for (const n of always) if (n.patternId !== 'nobleName') expect(n.text, n.text).not.toContain(' ');
+    expect(always.some((n) => n.patternId === 'nobleName' && n.text.includes(' '))).toBe(true);
+    const never = names({ ...context({ onlyPattern: 'ordinalModNoun' }), weights: { ...DEFAULTS, style: { hyphenate: 0 } } }, 300);
+    expect(never.every((n) => n.text.includes(' '))).toBe(true);
   });
 
   it('make a verb ending agree with its noun', () => {

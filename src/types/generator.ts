@@ -122,6 +122,8 @@ export interface Pattern {
   needs: Need[];
   options?: PatternOption[];
   rules?: OptionRule[];
+  /** True to keep this pattern's names out of the whole-name hyphenation style (Surname Forename). */
+  noHyphenStyle?: boolean;
   build(helpers: Helpers, has: HasOption): Part[];
 }
 

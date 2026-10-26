@@ -358,6 +358,7 @@ export const PATTERNS: Pattern[] = [
     example: 'Cathak Alon Mursa',
     weight: 9,
     needs: [],
+    noHyphenStyle: true,
     tip: 'A noble of the Realm: the name of a Great or Minor House, then a personal name. Cathak Alon Mursa, Ferem Kea.',
     build: (h) => [h.word('house'), h.word('personal name')],
   },

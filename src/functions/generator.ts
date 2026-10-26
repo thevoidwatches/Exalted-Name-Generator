@@ -1,6 +1,7 @@
 import {
   PATTERNS,
   blockedRules,
+  chance,
   createHelpers,
   describeNeeds,
   missingNeeds,
@@ -47,8 +48,11 @@ export function makeName(ctx: GeneratorContext, patterns: Pattern[] = PATTERNS):
     const parts = pattern.build(helpers, (option) => chosen.has(option));
     const bases = parts.flatMap((p) => (p.base ? [p.base.toLowerCase()] : []));
     if (new Set(bases).size !== bases.length) continue;
+    const text = parts.map((p, i) => (i ? (p.joinBefore ?? ' ') : '') + p.text).join('');
+    // The whole-name style joins every word with hyphens: Shining-Omen-of-Falling-Stars.
+    const hyphenate = !pattern.noHyphenStyle && chance(ctx.weights.style.hyphenate / 100);
     return {
-      text: parts.map((p, i) => (i ? (p.joinBefore ?? ' ') : '') + p.text).join(''),
+      text: hyphenate ? text.replace(/ /g, '-') : text,
       form: parts.flatMap((p) => (p.kind ? [p.kind] : [])).join(' · '),
       patternId: pattern.id,
       parts,

@@ -49,10 +49,10 @@ describe('the Weights panel', () => {
       />,
     );
 
-  it('has a bar for every pattern, every optional part, every weighted source and every tier', () => {
+  it('has a bar for every pattern, optional part, weighted source and tier, and the style', () => {
     const bars = render('tier').match(/class="wbar"/g)?.length;
     const weighted = CATEGORIES.filter((c) => c.weight !== undefined).length;
-    expect(bars).toBe(PATTERNS.length + optionKeys(PATTERNS).length + weighted + 3);
+    expect(bars).toBe(PATTERNS.length + optionKeys(PATTERNS).length + weighted + 3 + 1);
   });
 
   it('shows the per-list split only in per-word mode', () => {
