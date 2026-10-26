@@ -120,72 +120,67 @@ export const PATTERNS: Pattern[] = [
     },
   },
   {
-    id: 'nounEnding',
-    label: '{number} {modifier} Noun {ending}',
-    example: 'Two Dogs Pursuing',
-    weight: 18,
+    id: 'modModNoun',
+    label: 'Adjective/Gerund Color/Material Noun',
+    example: 'Rusted Iron Dove',
+    weight: 6,
+    needs: ['adjectiveOrGerund', 'colorOrMaterial', 'noun'],
+    tip: 'An adjective or gerund, then a color or material, then one noun: Rusted Iron Dove, Weeping Crimson Lotus.',
+    build: (h) => [h.modifier(['color', 'material']), h.modifier(['adjective', 'gerund']), h.noun()],
+  },
+  {
+    id: 'doubleModNoun',
+    label: 'Adverb/Adjective Adjective/Gerund Noun',
+    example: 'Eternally Mourning Virgin',
+    weight: 4,
+    needs: ['adverbOrAdjective', 'adjectiveOrGerund', 'noun'],
+    tip: 'An adverb or adjective, then an adjective or gerund, then a noun. Often a little goofy: Eternally Mourning Virgin, Lovely Silken Dancer, Unfailingly Righteous Brotherhood.',
+    build: (h) => [h.pick(['adverb', 'adjective']), h.pick(['adjective', 'gerund']), h.noun()],
+  },
+  {
+    id: 'nounPair',
+    label: '{modifier} Noun{hyphen}Noun',
+    example: 'Crimson Wolf-Fang',
+    weight: 19,
     needs: ['noun'],
-    tip: 'A noun with a number before it (which makes it plural), a gerund, adjective or verb after it, or both: Seven Ravens, Swan Ascendant, Two Dogs Pursuing, Twelve Dogs Thunder. A modifier may come before the noun: Crimson Serpent Arriving.',
+    tip: 'Two nouns side by side, hyphenated half the time, sometimes with a modifier in front: Wolf-Fang, Storm Crane, Crimson Lotus Blade.',
     options: [
       {
-        id: 'number', label: 'Number', chance: 35, needs: ['cardinal'],
-        tip: 'A counting number before the noun, which makes it plural: Seven Ravens.',
+        id: 'modifier', label: 'Modifier', chance: 35, needs: ['modifier'],
+        tip: 'A modifier before the pair: Crimson Lotus Blade.',
       },
       {
-        id: 'modifier', label: 'Modifier', chance: 10, needs: ['modifier'],
-        tip: 'A modifier just before the noun: Crimson Serpent Arriving, Seven Silver Ravens.',
-      },
-      {
-        id: 'ending', label: 'Gerund/Adjective/Verb', chance: 80, needs: ['adjectiveGerundOrVerb'],
-        tip: 'A gerund, adjective or verb after the noun: Serpent Arriving, Swan Ascendant, Serpent Sleeps.',
+        id: 'hyphen', label: '-', name: 'Hyphen', chance: 50, offText: ' ',
+        tip: 'A hyphen between the nouns instead of a space: Wolf-Fang rather than Wolf Fang.',
       },
     ],
-    rules: [{ kind: 'atLeastOne', options: ['number', 'ending'] }],
     build: (h, has) => {
-      const parts: Part[] = [];
-      if (has('number')) parts.push(h.cardinal());
-      if (has('modifier')) parts.push(h.modifier());
-      // A bare count takes the number slot, which allows epithets (Three Bargains); with an ending, any head noun.
-      parts.push(h.noun(has('number') && !has('ending') ? 'number' : 'head', { plural: has('number') }));
-      if (has('ending')) {
-        const end = h.pick(['adjective', 'gerund', 'verb']);
-        // A verb agrees with its noun: Serpent Sleeps, Twelve Dogs Thunder.
-        parts.push(end.kind === 'verb' && has('number') ? h.pluralize(end) : end);
-      }
+      const second = h.noun('compound');
+      const parts = [h.noun('compound'), has('hyphen') ? { ...second, joinBefore: '-' } : second];
+      if (has('modifier')) parts.unshift(h.modifier());
       return parts;
     },
   },
   {
-    id: 'nounOfNoun',
-    label: '{lead} Noun of {the} {tailModifier} Noun {and}',
-    example: 'Lotus of Weeping Iron',
-    weight: 10,
+    id: 'prepTheNounOf',
+    label: 'Preposition the Noun of Noun',
+    example: 'Beneath the Hush of Winter',
+    weight: 4,
     needs: ['noun'],
-    tip: 'A noun (sometimes plural), "of", and a nature word, place, material, concept, epithet or plural noun, with optional modifiers on either side: Gold Star of Morn, Lotus of Weeping Iron, Right Hand of Ordained Rule, Sage of the Lilac Garden.',
-    options: [
-      {
-        id: 'lead', label: 'Modifier', name: 'Opening modifier', chance: 35, needs: ['ordinalOrModifier'],
-        tip: 'A modifier or ordinal before the first noun: Gold Star of Morn, Right Hand of Ordained Rule.',
-      },
-      {
-        id: 'the', label: 'the', name: '"the"', chance: 50,
-        tip: '"of the" instead of "of", before a nature word, a place, or a modifier and noun: Hand of the Sea, Sage of the Lilac Garden.',
-      },
-      {
-        id: 'tailModifier', label: 'Modifier', name: 'Modifier after "of"', chance: 50, needs: ['modifier'],
-        tip: 'A modifier before the last noun, which may then be plural or a material: Lotus of Weeping Iron, Breath of Frozen Tears.',
-      },
-      {
-        id: 'and', label: 'and Noun', name: '"and" a second noun', chance: 15,
-        tip: 'A second noun joined with "and": Sweet Voice of Brass and Glory.',
-      },
-    ],
-    build: (h, has) => {
-      const parts: Part[] = [];
-      const lead = has('lead') ? h.leadIn(0.4) : null;
-      if (lead) parts.push(lead);
-      parts.push(h.chance(0.2) ? h.noun('head', { plural: true }) : h.noun(), h.literal('of'));
-      return [...parts, ...nameEnd(h, has, OF_END)];
+    tip: 'A preposition, "the", a noun, then "of" and a nature word, place or plural noun: Beneath the Hush of Winter, Under the Eye of Heaven.',
+    build: (h) => {
+      const preposition = h.preposition(['of']);
+      const tail = h.chance(0.6)
+        ? h.noun('head', { only: ['nature', 'place'] })
+        : h.noun('head', { only: ['nature', 'animal', 'person', 'plant'], plural: true });
+      return [
+        // Lowercase prepositions such as "in" still open the name with a capital.
+        { ...preposition, text: preposition.text[0].toUpperCase() + preposition.text.slice(1) },
+        h.literal('the'),
+        h.noun(),
+        h.literal('of'),
+        tail,
+      ];
     },
   },
   {
@@ -215,6 +210,49 @@ export const PATTERNS: Pattern[] = [
       if (has('lead')) parts.unshift(h.modifier());
       return parts;
     },
+  },
+  {
+    id: 'titleOf',
+    label: '{lead} Title of {tailNumber/tailModifier} Noun',
+    example: 'Dancer of Thirteen Crowns',
+    weight: 4,
+    needs: ['title', 'noun'],
+    tip: 'An optional modifier or ordinal, a title (a person or epithet), then "of", an optional number or modifier, and a noun, usually plural.',
+    options: [
+      {
+        id: 'lead', label: 'Modifier', name: 'Opening modifier', chance: 55, needs: ['ordinalOrModifier'],
+        tip: 'A modifier or ordinal before the title: Seventh Daughter of Storms.',
+      },
+      {
+        id: 'tailNumber', label: 'Number', name: 'Number after "of"', chance: 25, needs: ['cardinal'],
+        tip: 'A counting number before the last noun: Dancer of Thirteen Crowns.',
+      },
+      {
+        id: 'tailModifier', label: 'Modifier', name: 'Modifier after "of"', chance: 35, needs: ['modifier'],
+        tip: 'A modifier other than a gerund before the last noun: Dancer of Scarlet Crowns.',
+      },
+    ],
+    rules: [{ kind: 'atMostOne', options: ['tailNumber', 'tailModifier'] }],
+    build: (h, has) => {
+      const parts: Part[] = [];
+      const lead = has('lead') ? h.leadIn(0.35) : null;
+      if (lead) parts.push(lead);
+      parts.push(h.noun('title'), h.literal('of'));
+      if (has('tailNumber')) parts.push(h.cardinal());
+      else if (has('tailModifier') && h.anyModifier(['gerund'])) parts.push(h.modifier(['gerund']));
+      parts.push(h.tailNoun(has('tailNumber')));
+      return parts;
+    },
+  },
+  {
+    id: 'nobleName',
+    label: 'Surname Forename',
+    example: 'Cathak Alon Mursa',
+    weight: 9,
+    needs: [],
+    noHyphenStyle: true,
+    tip: 'A noble of the Realm: the name of a Great or Minor House, then a personal name. Cathak Alon Mursa, Ferem Kea.',
+    build: (h) => [h.word('house'), h.word('personal name')],
   },
   {
     id: 'prep',
@@ -256,110 +294,72 @@ export const PATTERNS: Pattern[] = [
     },
   },
   {
-    id: 'prepTheNounOf',
-    label: 'Preposition the Noun of Noun',
-    example: 'Beneath the Hush of Winter',
-    weight: 4,
+    id: 'nounOfNoun',
+    label: '{lead} Noun of {the} {tailModifier} Noun {and}',
+    example: 'Lotus of Weeping Iron',
+    weight: 10,
     needs: ['noun'],
-    tip: 'A preposition, "the", a noun, then "of" and a nature word, place or plural noun: Beneath the Hush of Winter, Under the Eye of Heaven.',
-    build: (h) => {
-      const preposition = h.preposition(['of']);
-      const tail = h.chance(0.6)
-        ? h.noun('head', { only: ['nature', 'place'] })
-        : h.noun('head', { only: ['nature', 'animal', 'person', 'plant'], plural: true });
-      return [
-        // Lowercase prepositions such as "in" still open the name with a capital.
-        { ...preposition, text: preposition.text[0].toUpperCase() + preposition.text.slice(1) },
-        h.literal('the'),
-        h.noun(),
-        h.literal('of'),
-        tail,
-      ];
-    },
-  },
-  {
-    id: 'titleOf',
-    label: '{lead} Title of {tailNumber/tailModifier} Noun',
-    example: 'Dancer of Thirteen Crowns',
-    weight: 4,
-    needs: ['title', 'noun'],
-    tip: 'An optional modifier or ordinal, a title (a person or epithet), then "of", an optional number or modifier, and a noun, usually plural.',
+    tip: 'A noun (sometimes plural), "of", and a nature word, place, material, concept, epithet or plural noun, with optional modifiers on either side: Gold Star of Morn, Lotus of Weeping Iron, Right Hand of Ordained Rule, Sage of the Lilac Garden.',
     options: [
       {
-        id: 'lead', label: 'Modifier', name: 'Opening modifier', chance: 55, needs: ['ordinalOrModifier'],
-        tip: 'A modifier or ordinal before the title: Seventh Daughter of Storms.',
+        id: 'lead', label: 'Modifier', name: 'Opening modifier', chance: 35, needs: ['ordinalOrModifier'],
+        tip: 'A modifier or ordinal before the first noun: Gold Star of Morn, Right Hand of Ordained Rule.',
       },
       {
-        id: 'tailNumber', label: 'Number', name: 'Number after "of"', chance: 25, needs: ['cardinal'],
-        tip: 'A counting number before the last noun: Dancer of Thirteen Crowns.',
+        id: 'the', label: 'the', name: '"the"', chance: 50,
+        tip: '"of the" instead of "of", before a nature word, a place, or a modifier and noun: Hand of the Sea, Sage of the Lilac Garden.',
       },
       {
-        id: 'tailModifier', label: 'Modifier', name: 'Modifier after "of"', chance: 35, needs: ['modifier'],
-        tip: 'A modifier other than a gerund before the last noun: Dancer of Scarlet Crowns.',
+        id: 'tailModifier', label: 'Modifier', name: 'Modifier after "of"', chance: 50, needs: ['modifier'],
+        tip: 'A modifier before the last noun, which may then be plural or a material: Lotus of Weeping Iron, Breath of Frozen Tears.',
+      },
+      {
+        id: 'and', label: 'and Noun', name: '"and" a second noun', chance: 15,
+        tip: 'A second noun joined with "and": Sweet Voice of Brass and Glory.',
       },
     ],
-    rules: [{ kind: 'atMostOne', options: ['tailNumber', 'tailModifier'] }],
     build: (h, has) => {
       const parts: Part[] = [];
-      const lead = has('lead') ? h.leadIn(0.35) : null;
+      const lead = has('lead') ? h.leadIn(0.4) : null;
       if (lead) parts.push(lead);
-      parts.push(h.noun('title'), h.literal('of'));
-      if (has('tailNumber')) parts.push(h.cardinal());
-      else if (has('tailModifier') && h.anyModifier(['gerund'])) parts.push(h.modifier(['gerund']));
-      parts.push(h.tailNoun(has('tailNumber')));
-      return parts;
+      parts.push(h.chance(0.2) ? h.noun('head', { plural: true }) : h.noun(), h.literal('of'));
+      return [...parts, ...nameEnd(h, has, OF_END)];
     },
   },
   {
-    id: 'nounPair',
-    label: '{modifier} Noun{hyphen}Noun',
-    example: 'Crimson Wolf-Fang',
-    weight: 19,
+    id: 'nounEnding',
+    label: '{number} {modifier} Noun {ending}',
+    example: 'Two Dogs Pursuing',
+    weight: 18,
     needs: ['noun'],
-    tip: 'Two nouns side by side, hyphenated half the time, sometimes with a modifier in front: Wolf-Fang, Storm Crane, Crimson Lotus Blade.',
+    tip: 'A noun with a number before it (which makes it plural), a gerund, adjective or verb after it, or both: Seven Ravens, Swan Ascendant, Two Dogs Pursuing, Twelve Dogs Thunder. A modifier may come before the noun: Crimson Serpent Arriving.',
     options: [
       {
-        id: 'modifier', label: 'Modifier', chance: 35, needs: ['modifier'],
-        tip: 'A modifier before the pair: Crimson Lotus Blade.',
+        id: 'number', label: 'Number', chance: 35, needs: ['cardinal'],
+        tip: 'A counting number before the noun, which makes it plural: Seven Ravens.',
       },
       {
-        id: 'hyphen', label: '-', name: 'Hyphen', chance: 50, offText: ' ',
-        tip: 'A hyphen between the nouns instead of a space: Wolf-Fang rather than Wolf Fang.',
+        id: 'modifier', label: 'Modifier', chance: 10, needs: ['modifier'],
+        tip: 'A modifier just before the noun: Crimson Serpent Arriving, Seven Silver Ravens.',
+      },
+      {
+        id: 'ending', label: 'Gerund/Adjective/Verb', chance: 80, needs: ['adjectiveGerundOrVerb'],
+        tip: 'A gerund, adjective or verb after the noun: Serpent Arriving, Swan Ascendant, Serpent Sleeps.',
       },
     ],
+    rules: [{ kind: 'atLeastOne', options: ['number', 'ending'] }],
     build: (h, has) => {
-      const second = h.noun('compound');
-      const parts = [h.noun('compound'), has('hyphen') ? { ...second, joinBefore: '-' } : second];
-      if (has('modifier')) parts.unshift(h.modifier());
+      const parts: Part[] = [];
+      if (has('number')) parts.push(h.cardinal());
+      if (has('modifier')) parts.push(h.modifier());
+      // A bare count takes the number slot, which allows epithets (Three Bargains); with an ending, any head noun.
+      parts.push(h.noun(has('number') && !has('ending') ? 'number' : 'head', { plural: has('number') }));
+      if (has('ending')) {
+        const end = h.pick(['adjective', 'gerund', 'verb']);
+        // A verb agrees with its noun: Serpent Sleeps, Twelve Dogs Thunder.
+        parts.push(end.kind === 'verb' && has('number') ? h.pluralize(end) : end);
+      }
       return parts;
     },
-  },
-  {
-    id: 'modModNoun',
-    label: 'Adjective/Gerund Color/Material Noun',
-    example: 'Rusted Iron Dove',
-    weight: 6,
-    needs: ['adjectiveOrGerund', 'colorOrMaterial', 'noun'],
-    tip: 'An adjective or gerund, then a color or material, then one noun: Rusted Iron Dove, Weeping Crimson Lotus.',
-    build: (h) => [h.modifier(['color', 'material']), h.modifier(['adjective', 'gerund']), h.noun()],
-  },
-  {
-    id: 'doubleModNoun',
-    label: 'Adverb/Adjective Adjective/Gerund Noun',
-    example: 'Eternally Mourning Virgin',
-    weight: 4,
-    needs: ['adverbOrAdjective', 'adjectiveOrGerund', 'noun'],
-    tip: 'An adverb or adjective, then an adjective or gerund, then a noun. Often a little goofy: Eternally Mourning Virgin, Lovely Silken Dancer, Unfailingly Righteous Brotherhood.',
-    build: (h) => [h.pick(['adverb', 'adjective']), h.pick(['adjective', 'gerund']), h.noun()],
-  },
-  {
-    id: 'nobleName',
-    label: 'Surname Forename',
-    example: 'Cathak Alon Mursa',
-    weight: 9,
-    needs: [],
-    noHyphenStyle: true,
-    tip: 'A noble of the Realm: the name of a Great or Minor House, then a personal name. Cathak Alon Mursa, Ferem Kea.',
-    build: (h) => [h.word('house'), h.word('personal name')],
   },
 ];
