@@ -109,26 +109,13 @@ export function WeightsDialog({
                   Verbs share endings with Adjectives and Gerunds; Adverbs share an opening with Adjectives.
                 </p>
               </WeightChart>
-              <WeightChart
-                title="Style"
-                rows={[{ id: 'hyphenate', label: 'Hyphenate whole name', value: weights.style.hyphenate }]}
-                step={1}
-                max={100}
-                showPercent={false}
-                onChange={(id, value) => onWeightChange('style', id, value)}
-                onReset={() => onResetSection('style')}
-              >
-                <p className="hint">
-                  The percentage of names joined with hyphens throughout, as in Shining-Omen-of-Falling-Stars. Never
-                  applies to Surname Forename.
-                </p>
-              </WeightChart>
             </div>
             <OptionsSection
               patterns={patterns}
               weights={weights}
               enabled={enabled}
               onChange={(key, value) => onWeightChange('options', key, value)}
+              onHyphenateChange={(value) => onWeightChange('style', 'hyphenate', value)}
               onReset={() => onResetSection('options')}
             />
             <RaritySection

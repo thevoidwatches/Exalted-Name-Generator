@@ -54,10 +54,9 @@ export function resetWeightSection(
   switch (section) {
     case 'patterns':
       return { ...current, patterns: { ...defaults.patterns } };
+    // The hyphenation style sits in the Optional parts section, so it resets with the parts.
     case 'options':
-      return { ...current, options: { ...defaults.options } };
-    case 'style':
-      return { ...current, style: { ...defaults.style } };
+      return { ...current, options: { ...defaults.options }, style: { ...defaults.style } };
     case 'rarity':
       return { ...current, wordMult: { ...defaults.wordMult }, tierShares: { ...defaults.tierShares } };
     case 'modifiers':

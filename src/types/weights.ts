@@ -15,4 +15,4 @@ export interface WeightConfig {
 }
 
 /** The sets of weights that can be reset independently in the Weights panel. */
-export type WeightSection = 'patterns' | 'options' | 'style' | 'modifiers' | 'nouns' | 'others' | 'rarity';
+export type WeightSection = 'patterns' | 'options' | 'modifiers' | 'nouns' | 'others' | 'rarity';

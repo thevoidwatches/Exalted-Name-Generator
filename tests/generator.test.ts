@@ -161,6 +161,13 @@ describe('weights', () => {
     expect(reset.categories.animal).toBe(1);
     expect(reset.patterns.ordinalModNoun).toBe(1);
   });
+
+  it('reset the hyphenation style along with the optional parts', () => {
+    const changed = { ...DEFAULTS, style: { hyphenate: 40 }, options: { ...DEFAULTS.options, 'nounPair.hyphen': 10 } };
+    const reset = resetWeightSection(changed, DEFAULTS, 'options', CATEGORIES);
+    expect(reset.style.hyphenate).toBe(DEFAULTS.style.hyphenate);
+    expect(reset.options['nounPair.hyphen']).toBe(DEFAULTS.options['nounPair.hyphen']);
+  });
 });
 
 describe('optional parts', () => {

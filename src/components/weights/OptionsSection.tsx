@@ -7,11 +7,27 @@ interface OptionsSectionProps {
   weights: WeightConfig;
   enabled: Record<string, boolean>;
   onChange: (key: string, value: number) => void;
+  /** Sets the whole-name hyphenation chance, which ends the section. */
+  onHyphenateChange: (value: number) => void;
   onReset: () => void;
 }
 
-/** The chance of each optional part, in one small chart per pattern that has any. */
-export function OptionsSection({ patterns, weights, enabled, onChange, onReset }: OptionsSectionProps) {
+/** The chance of each optional part in one small chart per pattern, then the whole-name hyphenation chance. */
+export function OptionsSection({ patterns, weights, enabled, onChange, onHyphenateChange, onReset }: OptionsSectionProps) {
+  const hyphenate = (
+    <WeightChart
+      key="hyphenate"
+      rows={[{ id: 'hyphenate', label: 'Hyphenate whole name', value: weights.style.hyphenate }]}
+      step={5}
+      max={100}
+      showPercent={false}
+      onChange={(_, value) => onHyphenateChange(value)}
+    >
+      <p className="part-head">Every pattern but Surname Forename</p>
+      <p className="hint">Joins every word of a name with hyphens: Shining-Omen-of-Falling-Stars.</p>
+    </WeightChart>
+  );
+
   const charts = patterns
     .filter((p) => p.options?.length)
     .map((pattern) => (
@@ -48,7 +64,7 @@ export function OptionsSection({ patterns, weights, enabled, onChange, onReset }
       onChange={onChange}
       onReset={onReset}
       wide
-      after={<div className="wcols">{charts}</div>}
+      after={<div className="wcols">{[...charts, hyphenate]}</div>}
     >
       <p className="hint">
         Unlike the other weights, these are percentages: how many of a pattern’s names include each bracketed part.
