@@ -1,5 +1,12 @@
 import type { Part, Pattern } from '@/types';
 
+/** Body parts that come in pairs or sets, which [Ordinal] [Modifier] Noun may make plural: Brilliant Eyes. */
+export const PAIRED_BODY_PARTS: readonly string[] = [
+  'Ankle', 'Antler', 'Bone', 'Brow', 'Cheek', 'Claw', 'Ear', 'Elbow', 'Eye', 'Fang', 'Feather', 'Fin', 'Finger',
+  'Fist', 'Foot', 'Hand', 'Heel', 'Hip', 'Hoof', 'Horn', 'Knee', 'Knuckle', 'Leg', 'Limb', 'Palm', 'Paw', 'Rib',
+  'Scale', 'Shoulder', 'Spine', 'Spur', 'Talon', 'Thumb', 'Toe', 'Tooth', 'Tusk', 'Whisker', 'Wing', 'Wrist',
+];
+
 /*
  * Name patterns, in chip order. `weight` is the default draw weight, adjustable in the Weights panel.
  * Optional parts are listed in `options` and written {id} in the label, which the chip shows as [Label].
@@ -9,11 +16,11 @@ import type { Part, Pattern } from '@/types';
 export const PATTERNS: Pattern[] = [
   {
     id: 'ordinalModNoun',
-    label: '{ordinal} {modifier} Noun',
+    label: '{ordinal} {modifier} Noun{plural}',
     example: 'Third Silken Blade',
     weight: 31,
     needs: ['noun'],
-    tip: 'A noun with an ordinal, a modifier or both before it: Seventh Crane, Harmonious Jade, Third Silken Blade. With both, the modifier sometimes comes first: Sinister Third Star. After a modifier, a material may stand as the noun: Weeping Iron.',
+    tip: 'A noun with an ordinal, a modifier or both before it: Seventh Crane, Harmonious Jade, Third Silken Blade. With both, the modifier sometimes comes first: Sinister Third Star. After a modifier, a material may stand as the noun (Weeping Iron), and a body part that comes in pairs may be plural (Brilliant Eyes).',
     options: [
       {
         id: 'ordinal', label: 'Ordinal', chance: 60, needs: ['ordinal'],
@@ -23,14 +30,21 @@ export const PATTERNS: Pattern[] = [
         id: 'modifier', label: 'Modifier', chance: 65, needs: ['modifier'],
         tip: 'A modifier (adjective, color, material or gerund) before the noun: Harmonious Jade.',
       },
+      {
+        id: 'plural', label: 's', name: 'Plural body part', chance: 50, needs: ['modifier'],
+        tip: 'With a modifier and no ordinal, a body part that comes in pairs or sets is made plural: Brilliant Eyes, Swift Feet.',
+      },
     ],
     rules: [{ kind: 'atLeastOne', options: ['ordinal', 'modifier'] }],
     build: (h, has) => {
       // A bare ordinal takes the ordinal slot, which allows epithets (Seventh Wrath).
       if (!has('modifier')) return [h.ordinal(), h.noun('ordinal')];
       const modifier = h.modifier();
-      const noun = h.noun('head', { orMaterial: modifier.kind !== 'material' });
-      if (!has('ordinal')) return [modifier, noun];
+      let noun = h.noun('head', { orMaterial: modifier.kind !== 'material' });
+      if (!has('ordinal')) {
+        if (has('plural') && noun.kind === 'body part' && PAIRED_BODY_PARTS.includes(noun.text)) noun = h.pluralize(noun);
+        return [modifier, noun];
+      }
       return h.chance(0.2) ? [modifier, h.ordinal(), noun] : [h.ordinal(), modifier, noun];
     },
   },

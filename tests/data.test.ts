@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORIES, WORDS } from '@/data';
-import { slotsOf } from '@/functions';
+import { PAIRED_BODY_PARTS, slotsOf } from '@/functions';
 
 // These run in CI before every deploy, so a mistake in a CSV edit stops the site from updating.
 describe('word lists', () => {
@@ -31,6 +31,12 @@ describe('word lists', () => {
   it('have no stray spaces around words', () => {
     for (const category of CATEGORIES) {
       for (const e of WORDS[category.id]) expect(e.word, category.id).toBe(e.word.trim());
+    }
+  });
+
+  it('give every paired body part in the plural rule a plural', () => {
+    for (const word of PAIRED_BODY_PARTS) {
+      expect(WORDS['body part'].find((e) => e.word === word)?.plural, word).toBeTruthy();
     }
   });
 

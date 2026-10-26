@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORIES, WORDS } from '@/data';
 import {
+  PAIRED_BODY_PARTS,
   PATTERNS,
   activePatterns,
   defaultWeights,
@@ -185,7 +186,7 @@ describe('optional parts', () => {
     expect(patternLabel(patternById('nounEnding'))).toBe('[Number] [Modifier] Noun [Gerund/Adjective]');
     expect(patternLabel(patternById('titleOf'))).toBe('[Modifier] Title of [Number/Modifier] Noun');
     expect(patternLabel(patternById('titleOf'), (id) => id !== 'tailNumber')).toBe('[Modifier] Title of [Modifier] Noun');
-    expect(patternLabel(patternById('ordinalModNoun'))).toBe('[Ordinal] [Modifier] Noun');
+    expect(patternLabel(patternById('ordinalModNoun'))).toBe('[Ordinal] [Modifier] Noun[s]');
     expect(patternLabel(patternById('nounPair'))).toBe('[Modifier] Noun[-]Noun');
     expect(patternLabel(patternById('nounPair'), () => false)).toBe('Noun Noun');
     expect(patternLabel(patternById('prep'))).toBe('Noun Preposition [the] Noun');
@@ -222,6 +223,18 @@ describe('optional parts', () => {
     expect(names(context({ onlyPattern: 'possessive', off: ['possessive.lead'] }), 300).every((n) => n.parts.length === 2)).toBe(true);
     const counted = names(context({ onlyPattern: 'nounEnding', off: ['nounEnding.number'] }), 300);
     expect(counted.some((n) => n.parts.some((p) => p.kind === 'cardinal'))).toBe(false);
+  });
+
+  it('make only paired body parts plural, and only after a modifier with no ordinal', () => {
+    const results = names(context({ onlyPattern: 'ordinalModNoun', chances: { 'ordinalModNoun.plural': 100 } }), 4000);
+    const plurals = results.filter((n) => n.parts.some((p) => p.entry?.plural && p.text === p.entry.plural && p.text !== p.entry.word));
+    expect(plurals.length).toBeGreaterThan(0);
+    for (const { parts, text } of plurals) {
+      const noun = parts[parts.length - 1];
+      expect(noun.kind, text).toBe('body part');
+      expect(PAIRED_BODY_PARTS, text).toContain(noun.base);
+      expect(parts.some((p) => p.kind === 'ordinal'), text).toBe(false);
+    }
   });
 
   it('let a material stand as the last noun only after a modifier that is not itself a material', () => {
@@ -293,6 +306,10 @@ describe('examples', () => {
     ['ordinalModNoun', 'Seventh Crane'],
     ['nounOf', 'Lotus of Weeping Iron'],
     ['nounEnding', 'Swan Ascendant'],
+    // Plural body parts after a modifier.
+    ['ordinalModNoun', 'Brilliant Eyes'],
+    ['ordinalModNoun', 'Strong Hands'],
+    ['ordinalModNoun', 'Swift Feet'],
   ];
 
   for (const [patternId, example] of cases) {
