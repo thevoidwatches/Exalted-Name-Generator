@@ -10,19 +10,20 @@ Click **Generate** for a batch, click a name to keep it, and **Copy all** to tak
 
 ## Editing the word lists
 
-Every word lives in one of five CSV files in `src/data/`:
+Every word lives in one of six CSV files in `src/data/`:
 
 | File | Categories |
 |---|---|
 | `modifiers.csv` | adjective, color, material, gerund |
 | `numbers.csv` | cardinal, ordinal |
-| `nouns.csv` | animal, plant, nature, object, body part, person, concept, epithet |
+| `nouns.csv` | animal, plant, nature, object, body part, person, concept, epithet, place |
 | `names.csv` | house, personal name |
+| `others.csv` | verb, adverb |
 | `prepositions.csv` | preposition |
 
 Each file has four columns: `word,plural,category,tier`.
 
-- **plural** is only used for nouns. Leave it blank for a word that should never appear in a plural slot, such as Blood or Wisdom.
+- **plural** is used for nouns and verbs. For a noun, leave it blank for a word that should never appear in a plural slot, such as Blood or Wisdom. For a verb, it's the form used after a plural subject: Thunders, Thunder.
 - **category** must be one of the categories that file allows.
 - **tier** is `common`, `normal` or `rare`. Blank means normal.
 - A word may appear in several categories, one row per category, each with its own tier.

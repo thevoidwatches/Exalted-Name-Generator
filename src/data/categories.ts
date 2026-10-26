@@ -1,7 +1,7 @@
 import type { CategoryGroup, CategoryInfo } from '@/types';
 
 /** The groups shown as rows of source chips. Names and prepositions are drawn only by their own patterns. */
-export const CHIP_GROUPS: readonly CategoryGroup[] = ['modifier', 'number', 'noun'];
+export const CHIP_GROUPS: readonly CategoryGroup[] = ['modifier', 'number', 'noun', 'other'];
 
 /*
  * Every word category, in chip order. Edit labels, tooltips and default weights here.
@@ -72,6 +72,20 @@ export const CATEGORIES: CategoryInfo[] = [
     id: 'epithet', group: 'noun', label: 'Epithets', weight: 6,
     slots: ['ordinal', 'number', 'target', 'title'],
     tip: 'Virtues, vices and deeds, such as Wrath, Insight, Theft. Used only after an ordinal, a number, or "of", or as the title in Title of Noun: Seventh Wrath, Three Bargains, Daughter of Insight, Dance of Laurels.',
+  },
+  {
+    id: 'place', group: 'noun', label: 'Places', weight: 10,
+    tip: 'Places people build or gather in, such as Temple, Market, Crypt, District, Garden. After "of" or a preposition they take "the" like nature words: Heron Beneath the Bridge.',
+  },
+
+  // Verbs and adverbs, for the few patterns that use them.
+  {
+    id: 'verb', group: 'other', label: 'Verbs', weight: 15,
+    tip: 'Things a noun does, such as Thunders, Sleeps, Howls. They can end [Number] [Modifier] Noun names, agreeing with the noun: Serpent Sleeps, Twelve Dogs Thunder.',
+  },
+  {
+    id: 'adverb', group: 'other', label: 'Adverbs', weight: 20,
+    tip: 'Words that sharpen an adjective, such as Eternally, Utterly, Softly. Used only in Adverb/Adjective Adjective/Gerund Noun: Eternally Mourning Virgin.',
   },
 
   // Noble names for Surname Forename; not shown as chips.

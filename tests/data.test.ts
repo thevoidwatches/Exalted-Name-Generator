@@ -16,10 +16,14 @@ describe('word lists', () => {
     }
   });
 
-  it('only give plurals to nouns', () => {
-    for (const category of CATEGORIES.filter((c) => c.group !== 'noun')) {
+  it('only give plurals to nouns and verbs', () => {
+    for (const category of CATEGORIES.filter((c) => c.group !== 'noun' && c.id !== 'verb')) {
       expect(WORDS[category.id].filter((e) => e.plural).map((e) => e.word), category.id).toEqual([]);
     }
+  });
+
+  it('give every verb a form for a plural subject', () => {
+    expect(WORDS.verb.filter((e) => !e.plural).map((e) => e.word)).toEqual([]);
   });
 
   it('give every noun category used after a number at least one plural', () => {

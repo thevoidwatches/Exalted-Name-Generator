@@ -57,8 +57,9 @@ export function resetWeightSection(
     case 'rarity':
       return { ...current, wordMult: { ...defaults.wordMult }, tierShares: { ...defaults.tierShares } };
     case 'modifiers':
-    case 'nouns': {
-      const group = section === 'modifiers' ? 'modifier' : 'noun';
+    case 'nouns':
+    case 'others': {
+      const group = section === 'modifiers' ? 'modifier' : section === 'nouns' ? 'noun' : 'other';
       const restored = { ...current.categories };
       for (const c of categories) {
         if (c.group === group && defaults.categories[c.id] !== undefined) restored[c.id] = defaults.categories[c.id];

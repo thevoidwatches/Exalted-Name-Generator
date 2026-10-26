@@ -46,7 +46,7 @@ export function WeightsDialog({
     if (!open && el.open) el.close();
   }, [open]);
 
-  const sourceRows = (group: 'modifier' | 'noun') =>
+  const sourceRows = (group: 'modifier' | 'noun' | 'other') =>
     categories
       .filter((c) => c.group === group)
       .map((c) => ({
@@ -98,6 +98,17 @@ export function WeightsDialog({
                 onChange={(id, value) => onWeightChange('categories', id, value)}
                 onReset={() => onResetSection('nouns')}
               />
+              <WeightChart
+                title="Other sources"
+                rows={sourceRows('other')}
+                showPercent={false}
+                onChange={(id, value) => onWeightChange('categories', id, value)}
+                onReset={() => onResetSection('others')}
+              >
+                <p className="hint">
+                  Verbs share endings with Adjectives and Gerunds; Adverbs share an opening with Adjectives.
+                </p>
+              </WeightChart>
             </div>
             <OptionsSection
               patterns={patterns}

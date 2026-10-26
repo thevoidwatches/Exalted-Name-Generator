@@ -12,12 +12,15 @@ export type NounCategory =
   | 'body part'
   | 'person'
   | 'concept'
-  | 'epithet';
+  | 'epithet'
+  | 'place';
 export type NameCategory = 'house' | 'personal name';
-export type Category = ModifierCategory | NumberCategory | NounCategory | NameCategory | 'preposition';
+/** Verbs and adverbs, used by a few patterns. A verb's plural is the form for a plural subject: Thunders, Thunder. */
+export type OtherCategory = 'verb' | 'adverb';
+export type Category = ModifierCategory | NumberCategory | NounCategory | NameCategory | OtherCategory | 'preposition';
 
 /** Which CSV a category lives in, and which chip row it appears in. */
-export type CategoryGroup = 'modifier' | 'number' | 'noun' | 'name' | 'preposition';
+export type CategoryGroup = 'modifier' | 'number' | 'noun' | 'name' | 'other' | 'preposition';
 
 /** One row of a word CSV. A null plural means the word is never used in a plural slot. */
 export interface WordEntry {

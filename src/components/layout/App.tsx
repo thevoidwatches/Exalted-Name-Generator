@@ -61,6 +61,7 @@ export function App() {
             <SourcePicker label="Modifier sources" categories={categoriesIn('modifier')} enabled={enabled} onToggle={toggle} />
             <SourcePicker label="Number sources" categories={categoriesIn('number')} enabled={enabled} onToggle={toggle} />
             <SourcePicker label="Noun sources" categories={categoriesIn('noun')} enabled={enabled} onToggle={toggle} />
+            <SourcePicker label="Other sources" categories={categoriesIn('other')} enabled={enabled} onToggle={toggle} />
             <GenerateBar
               count={count}
               hint={availabilityHint(ctx)}

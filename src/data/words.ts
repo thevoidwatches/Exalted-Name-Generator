@@ -2,6 +2,7 @@ import modifiersCsv from '@/data/modifiers.csv?raw';
 import namesCsv from '@/data/names.csv?raw';
 import nounsCsv from '@/data/nouns.csv?raw';
 import numbersCsv from '@/data/numbers.csv?raw';
+import othersCsv from '@/data/others.csv?raw';
 import prepositionsCsv from '@/data/prepositions.csv?raw';
 import { CATEGORIES } from '@/data';
 import { parseWordTable } from '@/functions';
@@ -13,6 +14,7 @@ const SOURCES: Array<[CategoryGroup, string, string]> = [
   ['number', 'numbers.csv', numbersCsv],
   ['noun', 'nouns.csv', nounsCsv],
   ['name', 'names.csv', namesCsv],
+  ['other', 'others.csv', othersCsv],
   ['preposition', 'prepositions.csv', prepositionsCsv],
 ];
 
