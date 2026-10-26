@@ -41,6 +41,8 @@ export type Need =
   | 'cardinal'
   | 'ordinalOrModifier'
   | 'adjectiveOrGerund'
+  | 'adjectiveGerundOrVerb'
+  | 'adverbOrAdjective'
   | 'colorOrMaterial';
 
 export interface NounOptions {
@@ -62,12 +64,15 @@ export interface Helpers {
   anyModifier(exclude?: Category[]): boolean;
   word(category: Category, options?: { plural?: boolean }): Part;
   modifier(exclude?: Category[]): Part;
+  /** A word from whichever of these categories is on, chosen by their source weights. */
+  pick(categories: Category[]): Part;
   noun(slot?: Slot, options?: NounOptions): Part;
   ordinal(): Part;
   cardinal(): Part;
   gerund(): Part;
   adjective(): Part;
-  preposition(): Part;
+  /** A joining word, never one of `except` (e.g. no "of" to open a name). */
+  preposition(except?: string[]): Part;
   literal(text: string): Part;
   /** An optional lead-in: an ordinal with the given chance, otherwise a modifier. Null if neither is on. */
   leadIn(ordinalChance: number): Part | null;

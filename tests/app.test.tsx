@@ -24,7 +24,7 @@ describe('the page', () => {
   });
 
   it('shows optional parts in brackets, with a menu button for every pattern that has them', () => {
-    expect(html).toContain('[Number] [Modifier] Noun [Gerund/Adjective]');
+    expect(html).toContain('[Number] [Modifier] Noun [Gerund/Adjective/Verb]');
     expect(html.match(/class="chip-more"/g)?.length).toBe(PATTERNS.filter((p) => p.options?.length).length);
   });
 });

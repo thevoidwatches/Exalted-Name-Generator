@@ -22,6 +22,10 @@ export function needMet(need: Need, ctx: GeneratorContext): boolean {
       return on('ordinal') || needMet('modifier', ctx);
     case 'adjectiveOrGerund':
       return on('adjective') || on('gerund');
+    case 'adjectiveGerundOrVerb':
+      return on('adjective') || on('gerund') || on('verb');
+    case 'adverbOrAdjective':
+      return on('adverb') || on('adjective');
     case 'colorOrMaterial':
       return on('color') || on('material');
   }
@@ -43,6 +47,8 @@ export const NEED_LABELS: Record<Need, string> = {
   cardinal: 'Cardinals',
   ordinalOrModifier: 'Ordinals or a modifier source',
   adjectiveOrGerund: 'Adjectives or Gerunds',
+  adjectiveGerundOrVerb: 'Adjectives, Gerunds or Verbs',
+  adverbOrAdjective: 'Adverbs or Adjectives',
   colorOrMaterial: 'Colors or Materials',
 };
 

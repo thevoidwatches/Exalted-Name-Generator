@@ -29,8 +29,9 @@ export function nounsForSlot(ctx: GeneratorContext, slot: Slot): CategoryInfo[] 
 }
 
 // After "of" in Title of Noun: these are always plural, these half the time, and materials stay singular.
+// After a number, everything but a material is plural (Beast of Seven Lamentations).
 const TAIL_ALWAYS_PLURAL: Category[] = ['animal', 'body part', 'object', 'person'];
-const TAIL_SOMETIMES_PLURAL: Category[] = ['nature', 'plant'];
+const TAIL_SOMETIMES_PLURAL: Category[] = ['nature', 'plant', 'concept'];
 
 // How strongly Materials competes with the noun sources when a material may stand as a noun (Weeping Iron).
 const MATERIAL_NOUN_WEIGHT = 14;
@@ -71,6 +72,13 @@ export function createHelpers(ctx: GeneratorContext): Helpers {
     if (!pool.length) pool = activeModifiers();
     const category = pickWeighted(pool.map((c) => [c, weightOf(c)] as const));
     return word(category.id);
+  };
+
+  // Like modifier, but across any categories, such as an ending that may be an adjective, gerund or verb.
+  const pick = (categories: Category[]): Part => {
+    const listed = ctx.categories.filter((c) => categories.includes(c.id));
+    const on = listed.filter((c) => isOn(c.id));
+    return word(pickWeighted((on.length ? on : listed).map((c) => [c.id, weightOf(c)] as const)));
   };
 
   // Narrows the noun categories step by step, keeping the first non-empty choice:
@@ -114,13 +122,18 @@ export function createHelpers(ctx: GeneratorContext): Helpers {
     anyModifier: (exclude) => activeModifiers(exclude).length > 0,
     word,
     modifier,
+    pick,
     noun,
     ordinal,
     cardinal,
     gerund: () => word('gerund'),
     adjective: () => word('adjective'),
     // Prepositions join a name like "of" does, so they are literals: not shown in the form or de-duplicated.
-    preposition: () => ({ text: word('preposition').text, base: null, kind: null }),
+    preposition: (except) => {
+      const all = ctx.words.preposition;
+      const pool = except ? all.filter((e) => !except.includes(e.word)) : all;
+      return { text: pickEntry(pool.length ? pool : all, ctx.rarityMode, ctx.weights).word, base: null, kind: null };
+    },
     literal: (text) => ({ text, base: null, kind: null }),
     pluralize,
 

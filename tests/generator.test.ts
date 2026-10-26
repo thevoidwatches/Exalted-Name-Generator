@@ -71,7 +71,7 @@ describe('every pattern', () => {
       it('only pluralises words that have a plural', () => {
         for (const { parts, text } of results) {
           for (const part of parts) {
-            if (!part.base || part.text === part.base || part.text === `${part.base}'s`) continue;
+            if (!part.base || [part.base, `${part.base}'s`, `${part.base}'`].includes(part.text)) continue;
             expect(part.entry?.plural, text).toBe(part.text);
           }
         }
@@ -96,18 +96,18 @@ describe('source chips', () => {
   });
 
   it('leave [Ordinal] [Modifier] Noun making Modifier Noun names when Ordinals is off', () => {
-    const results = names(context({ onlyPattern: 'ordinalModNoun', off: ['ordinal'] }), 300);
+    const results = names(context({ onlyPattern: 'ordinalModNoun', off: ['ordinal', 'ordinalModNoun.the'] }), 300);
     expect(results.length).toBeGreaterThan(280);
     expect(results.every((n) => n.parts.length === 2 && n.parts[0].kind !== 'ordinal')).toBe(true);
     const noLead = context({ off: ['ordinal', 'adjective', 'color', 'material', 'gerund'] });
     expect(unavailableReason(patternById('ordinalModNoun'), noLead)).toMatch(/Ordinal needs Ordinals/);
   });
 
-  it('disable [Number] Noun [Gerund/Adjective] only when neither a number nor an ending can appear', () => {
+  it('disable [Number] Noun [Gerund/Adjective/Verb] only when neither a number nor an ending can appear', () => {
     const pattern = patternById('nounEnding');
     expect(unavailableReason(pattern, context({ off: ['cardinal'] }))).toBeNull();
-    expect(unavailableReason(pattern, context({ off: ['adjective', 'gerund'] }))).toBeNull();
-    expect(unavailableReason(pattern, context({ off: ['cardinal', 'adjective', 'gerund'] }))).toMatch(/Number needs Cardinals/);
+    expect(unavailableReason(pattern, context({ off: ['adjective', 'gerund', 'verb'] }))).toBeNull();
+    expect(unavailableReason(pattern, context({ off: ['cardinal', 'adjective', 'gerund', 'verb'] }))).toMatch(/Number needs Cardinals/);
     expect(unavailableReason(pattern, context({ off: ['nounEnding.number', 'nounEnding.ending'] }))).toMatch(/switched off/);
     expect(activePatterns(context({ off: ['nounEnding.number', 'nounEnding.ending'] })).map((p) => p.id)).not.toContain('nounEnding');
   });
@@ -183,13 +183,16 @@ describe('optional parts', () => {
   });
 
   it('show in brackets, and drop out of the label when they cannot appear', () => {
-    expect(patternLabel(patternById('nounEnding'))).toBe('[Number] [Modifier] Noun [Gerund/Adjective]');
+    expect(patternLabel(patternById('nounEnding'))).toBe('[Number] [Modifier] Noun [Gerund/Adjective/Verb]');
     expect(patternLabel(patternById('titleOf'))).toBe('[Modifier] Title of [Number/Modifier] Noun');
     expect(patternLabel(patternById('titleOf'), (id) => id !== 'tailNumber')).toBe('[Modifier] Title of [Modifier] Noun');
-    expect(patternLabel(patternById('ordinalModNoun'))).toBe('[Ordinal] [Modifier] Noun[s]');
+    expect(patternLabel(patternById('ordinalModNoun'))).toBe('[The] [Ordinal] [Modifier] Noun[s]');
     expect(patternLabel(patternById('nounPair'))).toBe('[Modifier] Noun[-]Noun');
     expect(patternLabel(patternById('nounPair'), () => false)).toBe('Noun Noun');
-    expect(patternLabel(patternById('prep'))).toBe('Noun Preposition [the] Noun');
+    expect(patternLabel(patternById('prep'))).toBe('[Modifier] [Noun] Preposition [the] [Modifier] Noun [and Noun]');
+    expect(patternLabel(patternById('nounOfNoun'))).toBe('[Modifier] Noun of [the] [Modifier] Noun [and Noun]');
+    expect(patternLabel(patternById('possessive'))).toBe("[Modifier] Noun's [Modifier] Noun");
+    expect(patternLabel(patternById('prepTheNounOf'))).toBe('Preposition the Noun of Noun');
     expect(patternLabel(patternById('modModNoun'))).toBe('Adjective/Gerund Color/Material Noun');
   });
 
@@ -220,7 +223,7 @@ describe('optional parts', () => {
     for (const { parts, text } of hyphenated.filter((n) => n.parts.length === 3)) {
       expect(text).toBe(`${parts[0].text} ${parts[1].text}-${parts[2].text}`);
     }
-    expect(names(context({ onlyPattern: 'possessive', off: ['possessive.lead'] }), 300).every((n) => n.parts.length === 2)).toBe(true);
+    expect(names(context({ onlyPattern: 'possessive', off: ['possessive.lead', 'possessive.ownedModifier'] }), 300).every((n) => n.parts.length === 2)).toBe(true);
     const counted = names(context({ onlyPattern: 'nounEnding', off: ['nounEnding.number'] }), 300);
     expect(counted.some((n) => n.parts.some((p) => p.kind === 'cardinal'))).toBe(false);
   });
@@ -237,12 +240,42 @@ describe('optional parts', () => {
     }
   });
 
+  it('never put "the" straight before a material after "of"', () => {
+    const ctx = context({ onlyPattern: 'nounOfNoun', off: ['nounOfNoun.tailModifier', 'nounOfNoun.and'], chances: { 'nounOfNoun.the': 100 } });
+    const endsInMaterial = names(ctx, 3000).filter((n) => n.parts[n.parts.length - 1].kind === 'material');
+    expect(endsInMaterial.length).toBeGreaterThan(0);
+    for (const n of endsInMaterial) expect(n.text).not.toContain(`the ${n.parts[n.parts.length - 1].text}`);
+  });
+
   it('let a material stand as the last noun only after a modifier that is not itself a material', () => {
-    for (const id of ['ordinalModNoun', 'nounOf']) {
+    for (const id of ['ordinalModNoun', 'nounOfNoun']) {
       const results = names(context({ onlyPattern: id }), 3000);
       const ending = (n: GeneratedName) => n.parts.slice(-2).map((p) => p.kind);
       expect(results.some((n) => ending(n)[1] === 'material'), id).toBe(true);
       for (const n of results) if (ending(n)[1] === 'material') expect(ending(n)[0], n.text).not.toBe('material');
+    }
+  });
+
+  it('make a verb ending agree with its noun', () => {
+    const off = ['adjective', 'gerund'];
+    const counted = names(context({ onlyPattern: 'nounEnding', off, chances: { 'nounEnding.number': 100 } }), 300);
+    const single = names(context({ onlyPattern: 'nounEnding', off: [...off, 'nounEnding.number'] }), 300);
+    const verbOf = (n: GeneratedName) => n.parts[n.parts.length - 1];
+    for (const n of counted.filter((n) => verbOf(n).kind === 'verb')) expect(verbOf(n).text, n.text).toBe(verbOf(n).entry!.plural);
+    for (const n of single) expect(verbOf(n).text, n.text).toBe(verbOf(n).entry!.word);
+    expect(single.every((n) => verbOf(n).kind === 'verb')).toBe(true);
+  });
+
+  it('open Noun Preposition Noun with an adjective or gerund when the first noun is left out', () => {
+    for (const n of names(context({ onlyPattern: 'prep', off: ['prep.noun'] }), 500)) {
+      expect(['adjective', 'gerund'], n.text).toContain(n.parts[0].kind);
+    }
+  });
+
+  it('open Preposition the Noun of Noun with a capital, and never with "of"', () => {
+    for (const n of names(context({ onlyPattern: 'prepTheNounOf' }), 500)) {
+      expect(n.text, n.text).toMatch(/^[A-Z]/);
+      expect(n.text.startsWith('Of '), n.text).toBe(false);
     }
   });
 
@@ -304,19 +337,38 @@ describe('examples', () => {
     // The page header's examples, and the inverted adjective from the tooltips.
     ['ordinalModNoun', 'Harmonious Jade'],
     ['ordinalModNoun', 'Seventh Crane'],
-    ['nounOf', 'Lotus of Weeping Iron'],
+    ['nounOfNoun', 'Lotus of Weeping Iron'],
     ['nounEnding', 'Swan Ascendant'],
     // Plural body parts after a modifier.
     ['ordinalModNoun', 'Brilliant Eyes'],
     ['ordinalModNoun', 'Strong Hands'],
     ['ordinalModNoun', 'Swift Feet'],
+    // A plural or material after "of", and a concept after a number in Title of Noun.
+    ['nounOfNoun', 'Breath of Frozen Tears'],
+    ['nounOfNoun', 'Rain of Killing Shadows'],
+    ['nounOfNoun', 'Storm of Amber'],
+    ['titleOf', 'Beast of Seven Lamentations'],
+    // One of each newer shape from the extra names list.
+    ['nounOfNoun', 'Right Hand of Ordained Rule'],
+    ['nounOfNoun', 'Sage of the Lilac Garden'],
+    ['prep', 'Pale Bonfire Upon Broken Petals'],
+    ['prep', 'Austere in Calamity'],
+    ['prep', 'King in Hate and Despair'],
+    ['nounEnding', 'Twelve Dogs Thunder'],
+    ['ordinalModNoun', 'The Bloody Mouse'],
+    ['possessive', "Songbird's Eternal Dive"],
+    ['prepTheNounOf', 'Beneath the Hush of Winter'],
+    ['doubleModNoun', 'Unfailingly Righteous Brotherhood'],
+    ['nounPair', 'Peaceable District Guardian'],
   ];
 
   for (const [patternId, example] of cases) {
     it(`can produce ${example}`, () => {
       const ctx = exampleContext(example, patternId);
-      const seen = new Set(names(ctx, 3000).map((n) => n.text));
-      expect(seen).toContain(example);
+      // Some examples need several optional parts at once, so keep drawing until one turns up.
+      let found = false;
+      for (let i = 0; i < 20000 && !found; i++) found = makeName(ctx)?.text === example;
+      expect(found, example).toBe(true);
     });
   }
 });
