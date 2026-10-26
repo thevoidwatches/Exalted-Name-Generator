@@ -5,8 +5,10 @@ Ascending,,adjective,normal
 Ashen,,adjective,normal
 August,,adjective,rare
 Auspicious,,adjective,rare
+Bad,,adjective,common
 Benevolent,,adjective,normal
 Blessed,,adjective,normal
+Blissful,,adjective,normal
 Bloodied,,adjective,normal
 Bound,,adjective,normal
 Brazen,,adjective,normal
@@ -37,6 +39,7 @@ Fanged,,adjective,normal
 Feathered,,adjective,normal
 Flawless,,adjective,rare
 Flickering,,adjective,normal
+Forsaken,,adjective,normal
 Fortuitous,,adjective,normal
 Frozen,,adjective,normal
 Fruitful,,adjective,normal
@@ -44,6 +47,7 @@ Genial,,adjective,normal
 Gilded,,adjective,normal
 Glittering,,adjective,normal
 Glorious,,adjective,rare
+Gluttonous,,adjective,rare
 Graceful,,adjective,common
 Gracious,,adjective,normal
 Hallowed,,adjective,rare
@@ -53,6 +57,7 @@ Horizon,,adjective,rare
 Horned,,adjective,normal
 Humble,,adjective,common
 Immaculate,,adjective,normal
+Inauspicious,,adjective,rare
 Incandescent,,adjective,rare
 Incendiary,,adjective,rare
 Incomparable,,adjective,rare
@@ -67,6 +72,7 @@ Kingly,,adjective,rare
 Lacquered,,adjective,rare
 Leaden,,adjective,rare
 Lordly,,adjective,rare
+Lost,,adjective,common
 Luminous,,adjective,normal
 Lustrous,,adjective,normal
 Masked,,adjective,normal
@@ -77,9 +83,11 @@ Mysterious,,adjective,normal
 Nascent,,adjective,normal
 Noble,,adjective,common
 Notable,,adjective,normal
+Pensive,,adjective,normal
 Poised,,adjective,normal
 Powerful,,adjective,rare
 Precise,,adjective,normal
+Prideful,,adjective,normal
 Priestly,,adjective,rare
 Princely,,adjective,rare
 Queenly,,adjective,rare
@@ -99,8 +107,11 @@ Soaring,,adjective,normal
 Splendid,,adjective,normal
 Stalwart,,adjective,normal
 Starlit,,adjective,normal
+Still,,adjective,common
 Strident,,adjective,normal
+Strong,,adjective,common
 Sunlit,,adjective,normal
+Sweet,,adjective,common
 Swift,,adjective,common
 Tempestuous,,adjective,rare
 Terrible,,adjective,rare
@@ -108,10 +119,13 @@ Thorned,,adjective,normal
 Thunderous,,adjective,rare
 Triumphant,,adjective,rare
 Unfettered,,adjective,normal
+Unimpeachable,,adjective,rare
 Untarnished,,adjective,normal
 Unyielding,,adjective,normal
+Upright,,adjective,normal
 Veiled,,adjective,normal
 Venerated,,adjective,rare
+Venomous,,adjective,normal
 Victorious,,adjective,rare
 Vigorous,,adjective,normal
 Virtuous,,adjective,common
@@ -215,6 +229,7 @@ Binding,,gerund,normal
 Biting,,gerund,normal
 Bleeding,,gerund,normal
 Blessing,,gerund,normal
+Blinding,,gerund,normal
 Blocking,,gerund,normal
 Blossoming,,gerund,common
 Breathing,,gerund,normal
@@ -289,6 +304,7 @@ Inspiring,,gerund,normal
 Invoking,,gerund,normal
 Judging,,gerund,normal
 Kicking,,gerund,rare
+Killing,,gerund,normal
 Kissing,,gerund,normal
 Knocking,,gerund,rare
 Laboring,,gerund,normal
@@ -337,6 +353,7 @@ Shouting,,gerund,normal
 Singing,,gerund,common
 Slashing,,gerund,normal
 Sleeping,,gerund,common
+Smiling,,gerund,common
 Smithing,,gerund,rare
 Snowing,,gerund,normal
 Soaring,,gerund,common
