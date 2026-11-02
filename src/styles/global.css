@@ -115,6 +115,12 @@ select { font-family: var(--ui); font-size: .95rem; padding: 8px 10px; border-ra
 .ledger .btn { font-size: .9rem; padding: 8px 14px; }
 .toast { font-family: var(--ui); font-size: .85rem; color: var(--jade); min-height: 1.2em; }
 
+/* Footer */
+.page-footer { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); font-family: var(--ui); font-size: .9rem; color: var(--muted); }
+.page-footer ul { display: flex; flex-wrap: wrap; gap: 4px 18px; list-style: none; margin: 0; padding: 0; }
+.page-footer a { color: var(--gold); }
+.page-footer a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
 /* Weights panel */
 .modal { border: 1px solid var(--line); border-top: 3px solid var(--gold); background: var(--panel); color: var(--fg); padding: 0; width: min(880px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
 .modal::backdrop { background: var(--backdrop); }

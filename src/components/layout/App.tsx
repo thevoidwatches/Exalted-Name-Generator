@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   GenerateBar,
   KeptNames,
+  PageFooter,
   PageHeader,
   PatternPicker,
   ResultsList,
@@ -22,7 +23,7 @@ const CHIP_IDS = [
 ];
 const categoriesIn = (group: CategoryGroup) => CATEGORIES.filter((c) => c.group === group);
 
-/** The whole page: controls and results on the left, kept names on the right, and the Weights panel. */
+/** The whole page: controls and results on the left, kept names on the right, a footer, and the Weights panel. */
 export function App() {
   const { weights, setWeight, resetSection, resetAll, rarityMode, setRarityMode } = useWeights();
   const { enabled, toggle, setMany } = useToggles(STORAGE_KEYS.chips, CHIP_IDS);
@@ -83,6 +84,7 @@ export function App() {
           }}
         />
       </div>
+      <PageFooter />
       <WeightsDialog
         open={weightsOpen}
         onClose={() => setWeightsOpen(false)}

@@ -58,3 +58,8 @@ export const TOAST_MS = 2200;
 /** Batch sizes offered next to the Generate button. */
 export const BATCH_SIZES = [5, 10, 20, 50] as const;
 export const DEFAULT_BATCH_SIZE = 10;
+
+/** The owner's other GitHub Pages tools, linked from the page footer. */
+export const OTHER_TOOLS = [
+  { name: 'Mutants & Masterminds Encounter Calculator', url: 'https://thevoidwatches.github.io/MnM-Encounter-Calculator/' },
+] as const;

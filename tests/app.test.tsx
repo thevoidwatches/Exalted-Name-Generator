@@ -27,6 +27,11 @@ describe('the page', () => {
     expect(html).toContain('[Number] [Modifier] Noun [Gerund/Adjective/Verb]');
     expect(html.match(/class="chip-more"/g)?.length).toBe(PATTERNS.filter((p) => p.options?.length).length);
   });
+
+  it('links to the other tools in the footer', () => {
+    expect(html).toContain('Other tools from thevoidwatches:');
+    expect(html).toContain('href="https://thevoidwatches.github.io/MnM-Encounter-Calculator/"');
+  });
 });
 
 describe('the Weights panel', () => {
